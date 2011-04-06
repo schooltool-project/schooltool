@@ -26,7 +26,7 @@ import zope.event
 from zope.container.interfaces import INameChooser
 from zope.browserpage.viewpagetemplatefile import ViewPageTemplateFile
 from zope.component import adapts
-from zope.component import getMultiAdapter
+from zope.component import queryMultiAdapter
 from zope.interface.exceptions import Invalid
 from zope.interface import implements
 from zope.interface import Interface
@@ -36,14 +36,13 @@ from zope.security.proxy import removeSecurityProxy
 from zope.traversing.browser.absoluteurl import absoluteURL
 
 from z3c.form import form, field, button, widget, validator
-from z3c.form.browser.checkbox import SingleCheckBoxFieldWidget
 from z3c.form.util import getSpecification
 
 from schooltool.app.interfaces import ISchoolToolApplication
-from schooltool.app.utils import TitledContainerItemVocabulary
 from schooltool.calendar.utils import parse_date, parse_time
-from schooltool.course.interfaces import ISection
 from schooltool.common import DateRange
+from schooltool.course.interfaces import ISection
+from schooltool.schoolyear.interfaces import ISchoolYear
 from schooltool.term.interfaces import ITerm
 from schooltool.term.term import getTermForDate
 #from schooltool.timetable import SchooldaySlot
@@ -55,10 +54,11 @@ from schooltool.term.term import getTermForDate
 #from schooltool.timetable import TimetableOverlapError, TimetableOverflowError
 #from schooltool.timetable import validateAgainstTerm
 #from schooltool.timetable import validateAgainstOthers
+from schooltool.timetable.interfaces import IHaveSchedule
 from schooltool.traverser.traverser import TraverserPlugin
-from schooltool.schoolyear.interfaces import ISchoolYear
 
 from schooltool.common import SchoolToolMessage as _
+
 
 
 #def format_timetable_for_presentation(timetable):
@@ -403,260 +403,6 @@ from schooltool.common import SchoolToolMessage as _
 #        return absoluteURL(self.context, self.request)
 
 
-#class TimetableEditView(form.EditForm, TimetableConflictMixin):
-#    template = ViewPageTemplateFile('templates/timetable-edit.pt')
-#    fields = field.Fields(ITimetable).select(
-#        'first', 'last',
-#        'consecutive_periods_as_one')
-#    fields['consecutive_periods_as_one'].widgetFactory = SingleCheckBoxFieldWidget
-#
-#    def getDays(self):
-#        """Return the current selection.
-#
-#        Returns a list of dicts with the following keys
-#
-#            title   -- title of the timetable day
-#            periods -- list of timetable periods in that day
-#
-#        Each period is represented by a dict with the following keys
-#
-#            title    -- title of the period
-#            selected -- a boolean whether that period is in self.context's tt
-#                            for this shcema
-#
-#        """
-#        ttschema = self.context.schooltt
-#        def days(schema):
-#            for day_id, day in schema.items():
-#                yield {'title': day_id,
-#                       'periods': list(periods(day_id, day))}
-#
-#        def periods(day_id, day):
-#            for period_id in day.periods:
-#                selected = self.context[day_id][period_id]
-#                yield {'title': period_id,
-#                       'selected': selected}
-#
-#        return list(days(ttschema))
-#
-#    @property
-#    def timetable_dict(self):
-#        return self.context.__parent__
-#
-#    def updateActions(self):
-#        super(TimetableEditView, self).updateActions()
-#        self.actions['apply'].addClass('button-ok')
-#        self.actions['cancel'].addClass('button-cancel')
-#
-#    @button.buttonAndHandler(_('Save'), name='apply')
-#    def handleApply(self, action):
-#        data, errors = self.extractData()
-#        if errors:
-#            self.status = self.formErrorsMessage
-#            return
-#        changes = self.applyChanges(data)
-#        section = removeSecurityProxy(self.context.__parent__.__parent__)
-#        course_title = ''.join([course.title
-#                                for course in section.courses])
-#        timetable_changed = bool(changes)
-#        for day_id, day in removeSecurityProxy(self.context).items():
-#            for period_id, period in list(day.items()):
-#                if '.'.join((day_id, period_id)) in self.request:
-#                    if not period:
-#                        # XXX Resource list is being copied
-#                        # from section as this view can't do
-#                        # proper resource booking
-#                        act = TimetableActivity(title=course_title,
-#                                                owner=section,
-#                                                resources=section.resources)
-#                        day.add(period_id, act)
-#                        timetable_changed = True
-#                else:
-#                    if period:
-#                        for act in list(period):
-#                            day.remove(period_id, act)
-#                            timetable_changed = True
-#        self.status = self.successMessage
-#
-#        if timetable_changed:
-#            timetable = removeSecurityProxy(self.context)
-#            event = TimetableReplacedEvent(
-#                timetable.__parent__.__parent__, timetable.__name__,
-#                timetable, timetable)
-#            zope.event.notify(event)
-#        self.redirectToParent()
-#
-#    @button.buttonAndHandler(_("Cancel"), name='cancel')
-#    def handle_cancel_action(self, action):
-#        self.redirectToParent()
-#
-#    def redirectToParent(self):
-#        self.request.response.redirect(
-#            absoluteURL(self.context.__parent__,
-#                        self.request))
-#
-#    @property
-#    def ttschemas(self):
-#        return ITimetableSchemaContainer(ISchoolToolApplication(None))
-#
-#    @property
-#    def has_timetables(self):
-#        return bool(self.ttschemas)
-
-
-#class TimetableSchemaVocabulary(TitledContainerItemVocabulary):
-#
-#    @property
-#    def container(self):
-#        term = ITerm(self.context)
-#        return ITimetableSchemaContainer(term, {})
-
-
-#def timetableSchemaVocabularyFactory():
-#    return TimetableSchemaVocabulary
-
-
-#class ITimetableAddForm(Interface):
-#    """Form schema for ITerm add/edit views."""
-#
-#    schooltt = zope.schema.Choice(
-#        title=_("School timetable"),
-#        source="schooltool.timetable.browser.timetable_schema_vocabulary",
-#        required=True,
-#    )
-#
-#    first = zope.schema.Date(title=_("Apply from"))
-#
-#    last = zope.schema.Date(title=_("Apply until"))
-
-
-#class TimetableAddView(form.AddForm, TimetableConflictMixin):
-#
-#    template = ViewPageTemplateFile('templates/section-timetable-add.pt')
-#    fields = field.Fields(ITimetableAddForm)
-#
-#    _object_added = None
-#
-#    buttons = button.Buttons(
-#        button.Button('add', title=_('Add')),
-#        button.Button('cancel', title=_('Cancel')))
-#
-#    @button.handler(buttons["add"])
-#    def handleAdd(self, action):
-#        return form.AddForm.handleAdd.func(self, action)
-#
-#    @button.handler(buttons["cancel"])
-#    def handleCancel(self, action):
-#        url = absoluteURL(self.context, self.request)
-#        self.request.response.redirect(url)
-#
-#    def updateActions(self):
-#        super(TimetableAddView, self).updateActions()
-#        self.actions['add'].addClass('button-ok')
-#        self.actions['cancel'].addClass('button-cancel')
-#
-#    @property
-#    def timetable_dict(self):
-#        return self.context
-#
-#    @property
-#    def term(self):
-#        """Return the chosen term."""
-#        return ITerm(self.context)
-#
-#    def create(self, data):
-#        schema = data['schooltt']
-#        timetable = schema.createTimetable(self.term)
-#        timetable.first = data['first']
-#        timetable.last = data['last']
-#        return timetable
-#
-#    def add(self, timetable):
-#        chooser = INameChooser(self.context)
-#        name = chooser.chooseName('', timetable)
-#        self.context[name] = timetable
-#        self._object_added = timetable
-#
-#    def nextURL(self):
-#        if self._object_added is not None:
-#            return absoluteURL(self._object_added, self.request)
-#        return absoluteURL(self.context, self.request)
-#
-#
-#TimetableAdd_default_first = widget.ComputedWidgetAttribute(
-#    lambda adapter: adapter.view.term.first,
-#    view=TimetableAddView,
-#    field=ITimetableAddForm['first']
-#    )
-#
-#
-#TimetableAdd_default_last = widget.ComputedWidgetAttribute(
-#    lambda adapter: adapter.view.term.last,
-#    view=TimetableAddView,
-#    field=ITimetableAddForm['last']
-#    )
-
-
-#class TimetableFormValidator(validator.InvariantsValidator):
-#
-#    def _formatTitle(self, object):
-#        if object is None:
-#            return None
-#        def dateTitle(date):
-#            if date is None:
-#                return '...'
-#            formatter = getMultiAdapter((date, self.request), name='mediumDate')
-#            return formatter()
-#        return u"%s (%s - %s)" % (
-#            object.title, dateTitle(object.first), dateTitle(object.last))
-#
-#    def validateObject(self, timetable):
-#        errors = super(TimetableFormValidator, self).validateObject(timetable)
-#        try:
-#            dr = DateRange(timetable.first, timetable.last)
-#            timetable_dict = self.view.timetable_dict
-#            term = ITerm(timetable_dict)
-#            try:
-#                other_timetables = timetable_dict.values()
-#                if getattr(timetable, '__name__', None) is not None:
-#                    other_timetables = [tt for tt in other_timetables
-#                                        if tt.__name__ != timetable.__name__]
-#                validateAgainstOthers(
-#                    timetable.schooltt, timetable.first, timetable.last,
-#                    other_timetables)
-#            except TimetableOverlapError, e:
-#                for tt in e.overlapping:
-#                    errors += (Invalid(
-#                        u"%s %s" % (
-#                            _("Timetable conflicts with another:"),
-#                            self._formatTitle(tt))), )
-#            try:
-#                validateAgainstTerm(
-#                    timetable.schooltt, timetable.first, timetable.last,
-#                    term)
-#            except TimetableOverflowError, e:
-#                errors += (Invalid(u"%s %s" % (
-#                    _("Timetable does not fit in term"),
-#                    self._formatTitle(term))), )
-#        except ValueError, e:
-#            errors += (Invalid(_("Timetable must begin before it ends.")), )
-#        except validator.NoInputData:
-#            return errors
-#        return errors
-#
-#
-#validator.WidgetsValidatorDiscriminators(
-#    TimetableFormValidator,
-#    view=TimetableEditView,
-#    schema=getSpecification(ITimetable, force=True))
-#
-#
-#validator.WidgetsValidatorDiscriminators(
-#    TimetableFormValidator,
-#    view=TimetableAddView,
-#    schema=getSpecification(ITimetableAddForm, force=True))
-
-
 #class SpecialDayView(BrowserView):
 #    """The view for changing the periods for a particular day.
 #
@@ -837,75 +583,56 @@ from schooltool.common import SchoolToolMessage as _
 #            }
 
 
-#class SectionTimetablesView(SectionTimetablesViewBase):
-#
-#    __used_for__ = ITimetableDict
-#    template = ViewPageTemplateFile('templates/section-timetable-view.pt')
-#
-#    @property
-#    def owner(self):
-#        # XXX: make this property obsolete as soon as possible
-#        return self.context.__parent__
-#
-#    @property
-#    def term(self):
-#        return ITerm(self.owner)
-#
-#    @property
-#    def school_year(self):
-#        return ISchoolYear(self.term)
-#
-#    @property
-#    def timetables(self):
-#        timetables = sorted(self.context.values(),
-#                            key=lambda tt: (tt.first, tt.title))
-#        result = []
-#        for timetable in timetables:
-#            result.append(self.formatTimetableForTemplate(timetable))
-#        return result
-#
-#    def hasTimetables(self):
-#        return bool(self.context)
-#
-#    def __call__(self):
-#        return self.template()
+class ScheduleContainerView(BrowserView):
+    template = ViewPageTemplateFile('templates/schedule-container-view.pt')
+
+    @property
+    def owner(self):
+        return IHaveSchedule(self.context)
+
+    @property
+    def term(self):
+        return ITerm(self.owner, None)
+
+    @property
+    def school_year(self):
+        term = self.term
+        if term is None:
+            return None
+        return ISchoolYear(term, None)
+
+    def timetables(self):
+        snippets = filter(None, [
+            queryMultiAdapter((schedule, self.request), name='schedule_table')
+            for schedule in self.context.values()])
+        return snippets
+
+    def __call__(self):
+        return self.template()
 
 
-#class SectionTimetableDeleteView(SectionTimetablesViewBase):
-#
-#    __used_for__ = ITimetableDict
-#    template = ViewPageTemplateFile('templates/confirm-timetable-delete.pt')
-#
-#    def owner(self):
-#        # XXX: make this property obsolete as soon as possible
-#        return self.context.__parent__
-#
-#    @property
-#    def term(self):
-#        return ITerm(self.owner)
-#
-#    @property
-#    def school_year(self):
-#        return ISchoolYear(self.term)
-#
-#    @property
-#    def timetable(self):
-#        name = self.request['timetable']
-#        if name not in self.context:
-#            return None
-#        timetable = self.context[name]
-#        return self.formatTimetableForTemplate(timetable)
-#
-#    def nextURL(self):
-#        return absoluteURL(self.context, self.request)
-#
-#    def __call__(self):
-#        timetable = self.timetable
-#        if 'CONFIRM' in self.request and timetable is not None:
-#            del self.context[timetable['timetable'].__name__]
-#            self.request.response.redirect(self.nextURL())
-#        elif 'CANCEL' in self.request:
-#            self.request.response.redirect(self.nextURL())
-#        else:
-#            return self.template()
+class ScheduleDeleteView(BrowserView):
+    template = ViewPageTemplateFile('templates/confirm-schedule-delete.pt')
 
+    @property
+    def schedule(self):
+        name = self.request.get('schedule')
+        if name is None or name not in self.context:
+            return None
+        return self.context[name]
+
+    def nextURL(self):
+        return absoluteURL(self.context, self.request)
+
+    def __call__(self):
+        schedule = self.schedule
+        if schedule is not None:
+            if 'CONFIRM' in self.request:
+                del self.context[schedule.__name__]
+                self.request.response.redirect(self.nextURL())
+            elif 'CANCEL' in self.request:
+                self.request.response.redirect(self.nextURL())
+            else:
+                return self.template()
+        else:
+            self.request.response.redirect(self.nextURL())
