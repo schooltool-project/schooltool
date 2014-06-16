@@ -5,7 +5,8 @@ CHANGES
 2.8.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Avoid insecure content warning for fonts.googleapis.com when accessing
+  schooltool through https (https://launchpad.net/bugs/1330106)
 
 
 2.8.0 (2014-05-08)
