@@ -362,7 +362,7 @@ class GridCell(object):
     def __call__(self):
         if self.style.para_class:
             return '<para style="%s">%s</para>' % (
-                self.style.para_class, self.text)
+                self.style.para_class, minimal_escape_rml(self.text))
         return self.text
 
 
