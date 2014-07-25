@@ -45,6 +45,7 @@ from zc.table.interfaces import ISortableColumn
 
 from schooltool.app.interfaces import IApplicationPreferences
 from schooltool.app.interfaces import ISchoolToolApplication
+from schooltool.common.inlinept import InheritTemplate
 from schooltool.common.inlinept import InlineViewPageTemplate
 from schooltool.skin.containers import TableContainerView
 from schooltool.skin import flourish
@@ -199,6 +200,7 @@ class EmailSettingsEditView(form.EditForm):
 
 class FlourishEmailSettingsEditView(Form, form.EditForm):
 
+    template = InheritTemplate(flourish.page.Page.template)
     label = None
     legend = _('Settings')
     fields = field.Fields(IEmailSettingsEditForm)
@@ -744,6 +746,7 @@ class SendEmailView(form.Form):
 
 class FlourishSendEmailView(Form, SendEmailView):
 
+    template = InheritTemplate(flourish.page.Page.template)
     label = None
     legend = _('Email')
     fields = field.Fields(ISendEmailForm).omit('server_status')
