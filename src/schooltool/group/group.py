@@ -223,3 +223,4 @@ class RemoveGroupsWhenSchoolYearIsDeleted(ObjectEventAdapterSubscriber):
         for group_id, group in list(group_container.items()):
             IDependable(group).removeDependent('')
             del group_container[group_id]
+        del group_container.__parent__[group_container.__name__]
