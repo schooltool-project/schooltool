@@ -123,7 +123,7 @@ class DemographicsView(BrowserView):
             for name in self.request.get('delete', []):
                 del self.context[name]
         elif 'form-submitted' in self.request:
-            old_pos, new_pos = 0, 0, False
+            old_pos, new_pos = 0, 0
             for activity in self.context.values():
                 old_pos += 1
                 name = getName(activity)
@@ -398,7 +398,7 @@ class FlourishReorderDemographicsView(flourish.page.Page, DemographicsView):
                 if name in self.request:
                     del self.context[demo.__name__]
                     return
-            old_pos, new_pos = 0, 0, False
+            old_pos, new_pos = 0, 0
             for demo in self.context.values():
                 old_pos += 1
                 name = getName(demo)
