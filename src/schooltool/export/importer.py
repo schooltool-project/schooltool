@@ -2230,12 +2230,15 @@ class FlourishRemoteMegaImporter(flourish.page.Page):
             self.errors.append(_('No data provided'))
             return
 
-        app = ISchoolToolApplication(None)
-        task = ImportTask(RemoteMegaImporter, app)
+        task = self.getTask()
         task.request_params.update(self.form_params)
         task.schedule(self.request)
         message = query_message(task)
         self.message_b64 = message.__name__.encode('utf-8').encode('base64').strip()
+
+    def getTask(self):
+        app = ISchoolToolApplication(None)
+        return ImportTask(RemoteMegaImporter, app)
 
 
 class ImportProgress(TaskProgress):
