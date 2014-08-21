@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: schooltool\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-10-08 02:19+0300\n"
-"PO-Revision-Date: 2014-04-03 22:42+0000\n"
-"Last-Translator: MinSik CHO <Unknown>\n"
+"POT-Creation-Date: 2014-05-01 21:32+0300\n"
+"PO-Revision-Date: 2014-05-25 04:45+0000\n"
+"Last-Translator: Chang Geon Kang <kangha02@naver.com>\n"
 "Language-Team: Korean <ko@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-04-04 07:09+0000\n"
-"X-Generator: Launchpad (build 16976)\n"
+"X-Launchpad-Export-Date: 2014-05-26 06:34+0000\n"
+"X-Generator: Launchpad (build 17017)\n"
 "Language: ko\n"
 
 #: /src/schooltool/app/app.py:193
@@ -112,12 +112,7 @@ msgstr "추가"
 msgid "Remove"
 msgstr "제거"
 
-#: /src/schooltool/app/browser/app.py:408
-#: /src/schooltool/app/browser/templates/f_edit_relationships.pt:58
-msgid "Add all displayed"
-msgstr "모두 표시 추가"
-
-#: /src/schooltool/app/browser/app.py:677
+#: /src/schooltool/app/browser/app.py:741
 msgid "Username or password is incorrect"
 msgstr "입력하신 아이디 혹은 비밀번호가 일치하지 않습니다"
 
@@ -176,28 +171,20 @@ msgstr "현재 지도자"
 msgid "Available leaders"
 msgstr "남은 지휘자"
 
-#: /src/schooltool/app/browser/app.py:598
-msgid "Current responsible parties"
-msgstr "현제 응답하는 모임"
-
-#: /src/schooltool/app/browser/app.py:599
-msgid "Available responsible parties"
-msgstr "응답 가능한 모임"
-
-#: /src/schooltool/app/browser/app.py:741
-#: /src/schooltool/app/browser/flourish.zcml:149
-#: /src/schooltool/app/browser/flourish.zcml:170
-#: /src/schooltool/app/browser/flourish.zcml:218
-#: /src/schooltool/app/browser/flourish.zcml:260
-#: /src/schooltool/app/browser/flourish.zcml:272
-#: /src/schooltool/app/browser/flourish.zcml:292
-#: /src/schooltool/app/browser/flourish.zcml:457
-#: /src/schooltool/app/browser/flourish.zcml:553
+#: /src/schooltool/app/browser/app.py:1168
+#: /src/schooltool/app/browser/flourish.zcml:178
+#: /src/schooltool/app/browser/flourish.zcml:200
+#: /src/schooltool/app/browser/flourish.zcml:248
+#: /src/schooltool/app/browser/flourish.zcml:290
+#: /src/schooltool/app/browser/flourish.zcml:308
+#: /src/schooltool/app/browser/flourish.zcml:327
+#: /src/schooltool/app/browser/flourish.zcml:407
+#: /src/schooltool/app/browser/flourish.zcml:661
 #: /src/schooltool/email/browser/flourish.zcml:27
-#: /src/schooltool/email/browser/flourish.zcml:37
-#: /src/schooltool/email/browser/flourish.zcml:49
-#: /src/schooltool/email/browser/flourish.zcml:60
-#: /src/schooltool/email/browser/flourish.zcml:71
+#: /src/schooltool/email/browser/flourish.zcml:44
+#: /src/schooltool/email/browser/flourish.zcml:56
+#: /src/schooltool/email/browser/flourish.zcml:67
+#: /src/schooltool/email/browser/flourish.zcml:80
 #: /src/schooltool/securitypolicy/browser/flourish.zcml:15
 #: /src/schooltool/securitypolicy/browser/flourish.zcml:44
 msgid "Server"
@@ -1171,7 +1158,14 @@ msgstr "보여진 달력"
 msgid "School Logo"
 msgstr "학교 로고"
 
-#: /src/schooltool/app/browser/overlay.py:220
+#: /src/schooltool/app/browser/flourish.zcml:909
+#: /src/schooltool/app/browser/flourish.zcml:915
+#: /src/schooltool/app/browser/flourish.zcml:929
+#: /src/schooltool/app/browser/flourish.zcml:958
+msgid "Membership States"
+msgstr ""
+
+#: /src/schooltool/app/browser/overlay.py:219
 msgid "Saved changes."
 msgstr "저장사항을 변경합니다."
 
@@ -1218,6 +1212,69 @@ msgstr "%s 월간 일정"
 #: /src/schooltool/app/browser/report.py:57
 msgid "PDF support is disabled.  It can be enabled by your administrator."
 msgstr "PDF 지원이 해제되어있습니다. 관리자가 활성화 할 수 있습니다."
+
+#: /src/schooltool/app/browser/states.py:140
+#: /src/schooltool/contact/interfaces.py:70
+msgid "State"
+msgstr ""
+
+#: /src/schooltool/app/browser/states.py:182
+#: /src/schooltool/app/browser/templates/f_edit_relationship_state.pt:7
+#: /src/schooltool/app/interfaces.py:295
+#: /src/schooltool/basicperson/browser/person.py:1670
+#: /src/schooltool/email/interfaces.py:57
+msgid "Status"
+msgstr "상태"
+
+#: /src/schooltool/app/browser/states.py:186
+msgid "Apply on"
+msgstr ""
+
+#: /src/schooltool/app/browser/states.py:187
+#: /src/schooltool/app/browser/templates/f_temporal_results_button.pt:37
+#: /src/schooltool/basicperson/interfaces.py:74
+msgid "(yyyy-mm-dd)"
+msgstr "(년-월-일)"
+
+#: /src/schooltool/app/browser/states.py:205
+msgid "${target}"
+msgstr ""
+
+#: /src/schooltool/app/browser/states.py:263
+#: /src/schooltool/app/browser/templates/calendar_overlay.pt:31
+#: /src/schooltool/basicperson/browser/person.py:590
+#: /src/schooltool/email/browser/email.py:210
+#: /src/schooltool/level/browser/level.py:89
+#: /src/schooltool/person/browser/person.py:156
+#: /src/schooltool/person/browser/person.py:357
+#: /src/schooltool/resource/browser/resource.py:705
+#: /src/schooltool/skin/templates/view_macros.pt:148
+#: /src/schooltool/skin/templates/view_macros.pt:154
+#: /src/schooltool/timetable/browser/calendar.py:95
+#: /src/schooltool/timetable/browser/timetable.py:896
+msgid "Apply"
+msgstr "적용"
+
+#: /src/schooltool/app/browser/states.py:370
+#: /src/schooltool/app/browser/states.py:387
+msgid "Assign ${target}"
+msgstr ""
+
+#: /src/schooltool/app/browser/states.py:494
+msgid "Duplicate code ${code} in ${row}."
+msgstr ""
+
+#: /src/schooltool/app/browser/states.py:498
+msgid "Code field must not be empty in row ${row}."
+msgstr ""
+
+#: /src/schooltool/app/browser/states.py:502
+msgid "Title field must not be empty in row ${row}."
+msgstr ""
+
+#: /src/schooltool/app/browser/states.py:514
+msgid "Must have at least one ${title} state."
+msgstr ""
 
 #: /src/schooltool/app/browser/templates/about.pt:5
 msgid "About SchoolTool"
@@ -1378,11 +1435,6 @@ msgstr "달력"
 #: /src/schooltool/calendar/browser/templates/calendar_overlay.pt:12
 msgid "My Calendar"
 msgstr "내 캘린터"
-
-#: /src/schooltool/app/browser/templates/calendar_overlay.pt:31
-#: /src/schooltool/basicperson/browser/person.py:553
-msgid "Apply"
-msgstr "적용"
 
 #: /src/schooltool/app/browser/templates/calendar_overlay.pt:33
 #: /src/schooltool/calendar/browser/templates/calendar_overlay.pt:62
@@ -1616,13 +1668,7 @@ msgstr "반복"
 msgid "times"
 msgstr "시간"
 
-#: /src/schooltool/app/browser/templates/event_add.pt:306
-#: /src/schooltool/term/browser/templates/emergency_select.pt:31
-#: /src/schooltool/timetable/browser/templates/specialday_select.pt:31
-msgid "[popup calendar]"
-msgstr "[popup calendar]"
-
-#: /src/schooltool/app/browser/templates/event_add.pt:324
+#: /src/schooltool/app/browser/templates/event_add.pt:317
 #: /src/schooltool/calendar/browser/templates/event_edit.pt:324
 msgid "Repeat forever"
 msgstr "무한 반복"
@@ -1712,6 +1758,30 @@ msgstr "책"
 #: /src/schooltool/app/browser/templates/event_info_viewlet.pt:12
 msgid "Location: ${location}"
 msgstr "위치: ${location}"
+
+#: /src/schooltool/app/browser/templates/f_about.pt:2
+msgid ""
+"SchoolTool is an open source, web based student information system designed "
+"for schools in the developing world, with strong support for translation, "
+"localization and automated deployment and updates via the Ubuntu Linux "
+"installer and package management system."
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_about.pt:11
+msgid ""
+"SchoolTool is built on a 100% open source software stack, written in "
+"${python} using the ${zope} framework."
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_about.pt:15
+msgid "SchoolTool is licensed under the ${gpl2}"
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_about.pt:36
+msgid ""
+"${sielibre} offers commercial support, customization, hosting and other "
+"services for SchoolTool."
+msgstr ""
 
 #: /src/schooltool/app/browser/templates/f_about_related.pt:2
 msgid "Contributors"
@@ -1828,25 +1898,40 @@ msgstr "다른 문자 집합"
 msgid "submit-button"
 msgstr "등록버튼"
 
-#: /src/schooltool/app/browser/templates/f_csvimport.pt:117
-#: /src/schooltool/app/browser/templates/f_database.pt:33
-#: /src/schooltool/app/browser/templates/f_edit_relationships.pt:15
+#: /src/schooltool/app/browser/templates/f_edit_relationship_state.pt:9
+#: /src/schooltool/app/browser/templates/f_states_edit.pt:17
+msgid "Meaning"
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_edit_relationship_state.pt:10
+#: /src/schooltool/app/browser/templates/f_states_edit.pt:16
+#: /src/schooltool/app/interfaces.py:273
+msgid "Code"
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_edit_relationships.pt:26
 #: /src/schooltool/app/browser/templates/f_errors.pt:81
 #: /src/schooltool/app/browser/templates/f_errors_entry.pt:51
+#: /src/schooltool/app/browser/templates/f_managers.pt:48
 #: /src/schooltool/app/browser/templates/f_pack_database.pt:5
+#: /src/schooltool/app/browser/templates/f_tabled_edit_relationships.pt:5
 #: /src/schooltool/app/browser/templates/f_translationdomaincontrol.pt:39
-#: /src/schooltool/basicperson/browser/person.py:440
+#: /src/schooltool/basicperson/browser/person.py:516
+#: /src/schooltool/basicperson/browser/templates/f_container_table_filter.pt:72
 #: /src/schooltool/basicperson/browser/templates/f_demographics_reorder.pt:46
 #: /src/schooltool/basicperson/browser/templates/f_demographics_view.pt:33
-#: /src/schooltool/basicperson/browser/templates/f_person_view_details.pt:4
-#: /src/schooltool/calendar/browser/templates/event_booking.pt:63
-#: /src/schooltool/course/browser/templates/f_course_view.pt:92
-#: /src/schooltool/course/browser/templates/f_courses.pt:20
+#: /src/schooltool/basicperson/browser/templates/f_person_view_details.pt:10
+#: /src/schooltool/calendar/browser/templates/event_booking.pt:49
 #: /src/schooltool/course/browser/templates/f_section_linkage.pt:144
-#: /src/schooltool/course/browser/templates/f_section_view.pt:145
+#: /src/schooltool/course/browser/templates/f_section_view.pt:189
 #: /src/schooltool/course/browser/templates/f_sections.pt:20
-#: /src/schooltool/email/browser/templates/f_email_container.pt:75
-#: /src/schooltool/group/browser/templates/f_group_view.pt:107
+#: /src/schooltool/email/browser/templates/f_email_container.pt:25
+#: /src/schooltool/email/browser/templates/f_email_view.pt:12
+#: /src/schooltool/export/templates/f_import_remote.pt:53
+#: /src/schooltool/export/templates/f_import_remote.pt:57
+#: /src/schooltool/group/browser/templates/f_group_view.pt:111
+#: /src/schooltool/group/browser/templates/f_groups.pt:22
+#: /src/schooltool/group/browser/templates/f_groups.pt:26
 #: /src/schooltool/level/browser/templates/f_levels_reorder.pt:38
 #: /src/schooltool/level/browser/templates/f_levels_view.pt:26
 #: /src/schooltool/report/browser/templates/f_report_reference.pt:21
@@ -1876,6 +1961,10 @@ msgstr "완료"
 #: /src/schooltool/timetable/browser/templates/f_timetables.pt:14
 msgid "Showing ${count} of ${total} items"
 msgstr "$ {전체} 항목의 $ {카운트}보기"
+
+#: /src/schooltool/app/browser/templates/f_edit_relationships.pt:58
+msgid "Add all displayed"
+msgstr "모두 표시 추가"
 
 #: /src/schooltool/app/browser/templates/f_errors.pt:4
 msgid "Manage error settings"
@@ -2108,6 +2197,30 @@ msgstr "최신 버전입니다."
 msgid "Search"
 msgstr "찾기"
 
+#: /src/schooltool/app/browser/templates/f_relationship_states_related.pt:6
+msgid ""
+"SchoolTool has a set of built-in \"membership states,\" which define basic "
+"types of relationships between people and between people and groups. For "
+"each relationship, there is a limited set of \"meanings,\" and the school "
+"can add custom states that act as specific codes for local use."
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_relationship_states_related.pt:13
+msgid ""
+"For example, in the Student Enrollment relationship, a school could create "
+"both \"Dropped out\" and \"Transferred\". From the system's point of view, "
+"the \"meaning\" of both would be set to \"Inactive\", and the two states are "
+"treated the same, but to users the distinction between the two may be "
+"important and needs to be recorded explicitly."
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_relationship_states_related.pt:21
+msgid ""
+"In all cases \"Active\" is the default state, \"Inactive\" means that the "
+"relationship has ended, at least temporarily. In each case, all the built-in "
+"\"meanings\" must be used in at least one Title/Code/Meaning option."
+msgstr ""
+
 #: /src/schooltool/app/browser/templates/f_runtimeinfo.pt:7
 #: /src/schooltool/app/browser/templates/f_server_settings_overview.pt:12
 msgid "Database"
@@ -2266,6 +2379,29 @@ msgstr ""
 msgid "Please wait for confirmation that the database has been packed."
 msgstr ""
 
+#: /src/schooltool/app/browser/templates/f_states_edit.pt:53
+#: /src/schooltool/timetable/browser/timetable.py:685
+#: /src/schooltool/timetable/browser/timetable.py:823
+msgid "Save"
+msgstr "저장"
+
+#: /src/schooltool/app/browser/templates/f_temporal_results_button.pt:4
+msgid "Select All"
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_temporal_results_button.pt:5
+#: /src/schooltool/course/browser/templates/copy_sections.pt:70
+msgid "Select None"
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_temporal_results_button.pt:13
+msgid "Set selected to"
+msgstr ""
+
+#: /src/schooltool/app/browser/templates/f_temporal_results_button.pt:32
+msgid "Effective date"
+msgstr ""
+
 #: /src/schooltool/app/browser/templates/f_translationdomaincontrol.pt:13
 msgid "Domain ${domain}"
 msgstr ""
@@ -2329,8 +2465,12 @@ msgstr "로그인"
 msgid "Please log in"
 msgstr "로그인 하세요"
 
+#: /src/schooltool/app/browser/templates/package_versions.pt:2
+msgid "SchoolTool versions"
+msgstr ""
+
 #: /src/schooltool/app/browser/templates/portlet_tomorrow_events.pt:5
-#: /src/schooltool/calendar/browser/calendar.py:258
+#: /src/schooltool/calendar/browser/calendar.py:318
 msgid "Tomorrow's Events"
 msgstr "내일의 행사"
 
@@ -2669,7 +2809,35 @@ msgstr "이름"
 msgid "Last name"
 msgstr "이름 성"
 
-#: /src/schooltool/app/main.py:310
+#: /src/schooltool/app/interfaces.py:274
+msgid "A short status code, preferably few symbols."
+msgstr ""
+
+#: /src/schooltool/app/interfaces.py:278
+#: /src/schooltool/app/states.py:158
+#: /src/schooltool/app/states.py:272
+#: /src/schooltool/schoolyear/browser/schoolyear.py:226
+msgid "Active"
+msgstr ""
+
+#: /src/schooltool/app/interfaces.py:291
+msgid "Statuses"
+msgstr ""
+
+#: /src/schooltool/app/interfaces.py:292
+#: /src/schooltool/email/interfaces.py:43
+msgid "Recipient addresses"
+msgstr ""
+
+#: /src/schooltool/app/interfaces.py:300
+msgid "System state value descriptions"
+msgstr ""
+
+#: /src/schooltool/app/interfaces.py:301
+msgid "Descriptions of state \"active\" values"
+msgstr ""
+
+#: /src/schooltool/app/main.py:311
 msgid "Cannot resolve plugin action order:\n"
 msgstr ""
 
@@ -2783,6 +2951,93 @@ msgstr "캘린더 보기"
 msgid "Change calendar"
 msgstr "일정 변경"
 
+#: /src/schooltool/app/states.py:159
+#: /src/schooltool/app/states.py:273
+#: /src/schooltool/app/states.py:287
+#: /src/schooltool/contact/contact.py:246
+#: /src/schooltool/contact/contact.py:250
+#: /src/schooltool/course/section.py:475
+msgid "Inactive"
+msgstr ""
+
+#: /src/schooltool/app/states.py:231
+msgid "Group Membership"
+msgstr ""
+
+#: /src/schooltool/app/states.py:235
+#: /src/schooltool/app/states.py:253
+#: /src/schooltool/course/section.py:467
+msgid "Pending"
+msgstr ""
+
+#: /src/schooltool/app/states.py:236
+#: /src/schooltool/course/section.py:472
+msgid "Member"
+msgstr ""
+
+#: /src/schooltool/app/states.py:237
+msgid "Suspended"
+msgstr ""
+
+#: /src/schooltool/app/states.py:238
+#: /src/schooltool/basicperson/advisor.py:51
+#: /src/schooltool/course/section.py:489
+msgid "Removed"
+msgstr ""
+
+#: /src/schooltool/app/states.py:239
+#: /src/schooltool/app/states.py:259
+#: /src/schooltool/app/states.py:274
+#: /src/schooltool/app/states.py:288
+#: /src/schooltool/basicperson/advisor.py:52
+#: /src/schooltool/contact/contact.py:247
+#: /src/schooltool/course/section.py:471
+#: /src/schooltool/course/section.py:487
+msgid "Added in error"
+msgstr ""
+
+#: /src/schooltool/app/states.py:249
+msgid "Student Enrollment"
+msgstr ""
+
+#: /src/schooltool/app/states.py:254
+#: /src/schooltool/app/states.py:260
+#: /src/schooltool/app/states.py:284
+#: /src/schooltool/app/states.py:289
+msgid "Pre-enrolled"
+msgstr ""
+
+#: /src/schooltool/app/states.py:255
+#: /src/schooltool/app/states.py:285
+#: /src/schooltool/course/section.py:468
+msgid "Enrolled"
+msgstr ""
+
+#: /src/schooltool/app/states.py:256
+#: /src/schooltool/app/states.py:261
+msgid "Graduated/Active"
+msgstr ""
+
+#: /src/schooltool/app/states.py:257
+#: /src/schooltool/app/states.py:262
+msgid "Graduated/Inactive"
+msgstr ""
+
+#: /src/schooltool/app/states.py:258
+#: /src/schooltool/course/section.py:469
+#: /src/schooltool/course/section.py:486
+msgid "Withdrawn"
+msgstr ""
+
+#: /src/schooltool/app/states.py:280
+msgid "Student Levels"
+msgstr ""
+
+#: /src/schooltool/app/states.py:286
+#: /src/schooltool/app/states.py:290
+msgid "Graduated"
+msgstr ""
+
 #: /src/schooltool/app/timetable-integration.zcml:28
 msgid "Assign timetables"
 msgstr "할당 시간표"
@@ -2791,17 +3046,30 @@ msgstr "할당 시간표"
 msgid "Change schedule"
 msgstr "일정 변경"
 
-#: /src/schooltool/basicperson/browser/configure.zcml:14
-#: /src/schooltool/basicperson/browser/configure.zcml:217
-#: /src/schooltool/basicperson/browser/configure.zcml:224
-#: /src/schooltool/basicperson/browser/configure.zcml:231
-#: /src/schooltool/basicperson/browser/configure.zcml:238
-#: /src/schooltool/basicperson/browser/flourish.zcml:459
-#: /src/schooltool/basicperson/browser/flourish.zcml:468
-#: /src/schooltool/basicperson/browser/flourish.zcml:477
-#: /src/schooltool/basicperson/browser/flourish.zcml:486
-#: /src/schooltool/basicperson/browser/flourish.zcml:495
-#: /src/schooltool/common/configure.zcml:91
+#: /src/schooltool/basicperson/advisor.py:46
+#: /src/schooltool/basicperson/browser/configure.zcml:31
+#: /src/schooltool/basicperson/browser/flourish.zcml:699
+#: /src/schooltool/basicperson/browser/templates/f_advisoryViewlet.pt:6
+#: /src/schooltool/basicperson/security.py:31
+msgid "Advisors"
+msgstr ""
+
+#: /src/schooltool/basicperson/advisor.py:50
+msgid "Advising"
+msgstr ""
+
+#: /src/schooltool/basicperson/browser/configure.zcml:13
+#: /src/schooltool/basicperson/browser/configure.zcml:179
+#: /src/schooltool/basicperson/browser/configure.zcml:186
+#: /src/schooltool/basicperson/browser/configure.zcml:193
+#: /src/schooltool/basicperson/browser/configure.zcml:200
+#: /src/schooltool/basicperson/browser/flourish.zcml:503
+#: /src/schooltool/basicperson/browser/flourish.zcml:512
+#: /src/schooltool/basicperson/browser/flourish.zcml:521
+#: /src/schooltool/basicperson/browser/flourish.zcml:530
+#: /src/schooltool/basicperson/browser/flourish.zcml:539
+#: /src/schooltool/basicperson/browser/flourish.zcml:548
+#: /src/schooltool/common/security.zcml:11
 #: /src/schooltool/contact/browser/configure.zcml:6
 #: /src/schooltool/contact/browser/configure.zcml:31
 #: /src/schooltool/course/browser/configure.zcml:58
@@ -2817,16 +3085,9 @@ msgstr "일정 변경"
 msgid "View"
 msgstr "보기"
 
-#: /src/schooltool/basicperson/browser/configure.zcml:33
-#: /src/schooltool/basicperson/browser/flourish.zcml:692
-#: /src/schooltool/basicperson/browser/templates/f_advisoryViewlet.pt:6
-#: /src/schooltool/basicperson/security.py:32
-msgid "Advisors"
-msgstr ""
-
-#: /src/schooltool/basicperson/browser/configure.zcml:60
-#: /src/schooltool/basicperson/browser/flourish.zcml:593
-#: /src/schooltool/basicperson/browser/templates/f_advisoryViewlet.pt:25
+#: /src/schooltool/basicperson/browser/configure.zcml:40
+#: /src/schooltool/basicperson/browser/flourish.zcml:707
+#: /src/schooltool/basicperson/browser/templates/f_advisoryViewlet.pt:29
 msgid "Advisees"
 msgstr ""
 
@@ -3171,7 +3432,12 @@ msgid ""
 "10 MB"
 msgstr ""
 
-#: /src/schooltool/basicperson/browser/person.py:229
+#: /src/schooltool/basicperson/browser/person.py:192
+#: /src/schooltool/course/browser/course.py:620
+msgid "Grade Level"
+msgstr ""
+
+#: /src/schooltool/basicperson/browser/person.py:232
 msgid "This username is already in use"
 msgstr ""
 
@@ -3207,7 +3473,11 @@ msgstr ""
 msgid "Advisors of ${person}"
 msgstr ""
 
-#: /src/schooltool/basicperson/browser/person.py:660
+#: /src/schooltool/basicperson/browser/person.py:754
+msgid "Assign advisor ${target}"
+msgstr ""
+
+#: /src/schooltool/basicperson/browser/person.py:756
 msgid "Current advisors"
 msgstr ""
 
@@ -3227,7 +3497,11 @@ msgstr ""
 msgid "Advisees of ${person}"
 msgstr ""
 
-#: /src/schooltool/basicperson/browser/person.py:699
+#: /src/schooltool/basicperson/browser/person.py:793
+msgid "Assign advisee ${target}"
+msgstr ""
+
+#: /src/schooltool/basicperson/browser/person.py:795
 msgid "Current advisees"
 msgstr ""
 
@@ -3235,7 +3509,13 @@ msgstr ""
 msgid "Available advisees"
 msgstr ""
 
-#: /src/schooltool/basicperson/browser/person.py:935
+#: /src/schooltool/basicperson/browser/person.py:1025
+#: /src/schooltool/course/browser/templates/f_course_table_filter.pt:35
+#: /src/schooltool/level/browser/flourish.zcml:62
+msgid "Level"
+msgstr ""
+
+#: /src/schooltool/basicperson/browser/person.py:1029
 msgid "Relationships"
 msgstr ""
 
@@ -3300,6 +3580,14 @@ msgstr ""
 #: /src/schooltool/basicperson/browser/person.py:1561
 msgid "(${number} new)"
 msgstr ""
+
+#: /src/schooltool/basicperson/browser/person.py:1652
+msgid "Current responsible parties"
+msgstr "현제 응답하는 모임"
+
+#: /src/schooltool/basicperson/browser/person.py:1653
+msgid "Available responsible parties"
+msgstr "응답 가능한 모임"
 
 #: /src/schooltool/basicperson/browser/templates/container.pt:18
 msgid ""
@@ -3484,8 +3772,12 @@ msgstr ""
 msgid "Contact's Phone"
 msgstr ""
 
+#: /src/schooltool/basicperson/browser/templates/f_person_view_details.pt:6
+#: /src/schooltool/task/security.zcml:24
+msgid "Messages"
+msgstr ""
+
 #: /src/schooltool/basicperson/browser/templates/person-csvimport.pt:4
-#: /src/schooltool/person/browser/person-csvimport.pt:4
 msgid "Upload SchoolTool persons as CSV"
 msgstr ""
 
@@ -3608,11 +3900,8 @@ msgstr "남성"
 msgid "Birth date"
 msgstr "생년월일"
 
-#: /src/schooltool/basicperson/interfaces.py:74
-msgid "(yyyy-mm-dd)"
-msgstr "(년-월-일)"
-
-#: /src/schooltool/basicperson/interfaces.py:133
+#: /src/schooltool/basicperson/interfaces.py:135
+#: /src/schooltool/basicperson/interfaces.py:143
 msgid "As it should appear on forms and reports."
 msgstr ""
 
@@ -3894,7 +4183,19 @@ msgstr ""
 msgid "Add new contact"
 msgstr "새로운 연락처 추가"
 
-#: /src/schooltool/contact/browser/contact.py:248
+#: /src/schooltool/contact/browser/contact.py:225
+#: /src/schooltool/contact/browser/relationship.py:70
+#: /src/schooltool/contact/browser/templates/contactperson_subform.pt:8
+#: /src/schooltool/contact/interfaces.py:116
+msgid "Relationship"
+msgstr ""
+
+#: /src/schooltool/contact/browser/contact.py:226
+#: /src/schooltool/contact/interfaces.py:117
+msgid "Contact's relationship with the person"
+msgstr ""
+
+#: /src/schooltool/contact/browser/contact.py:308
 msgid "Add new contact for ${person}"
 msgstr ""
 
@@ -3962,17 +4263,32 @@ msgstr ""
 msgid "Delete ${contact_full_name}"
 msgstr ""
 
-#: /src/schooltool/contact/browser/flourish.zcml:206
+#: /src/schooltool/contact/browser/flourish.zcml:209
+#: /src/schooltool/contact/browser/flourish.zcml:218
+#: /src/schooltool/contact/browser/flourish.zcml:236
+msgid "Activate Parent Access"
+msgstr ""
+
+#: /src/schooltool/contact/browser/flourish.zcml:324
 msgid "Edit Contact Information"
 msgstr ""
 
-#: /src/schooltool/contact/browser/relationship.py:78
-#: /src/schooltool/contact/browser/templates/contactperson_subform.pt:8
-#: /src/schooltool/contact/interfaces.py:101
-msgid "Relationship"
+#: /src/schooltool/contact/browser/flourish.zcml:365
+#: /src/schooltool/contact/contact.py:241
+msgid "Parent"
 msgstr ""
 
-#: /src/schooltool/contact/browser/relationship.py:89
+#: /src/schooltool/contact/browser/parent.py:131
+msgid "Create SchoolTool user"
+msgstr ""
+
+#: /src/schooltool/contact/browser/parent.py:136
+#: /src/schooltool/email/browser/email.py:101
+#: /src/schooltool/email/interfaces.py:86
+msgid "Enable"
+msgstr ""
+
+#: /src/schooltool/contact/browser/relationship.py:81
 msgid "Assigned Contacts"
 msgstr ""
 
@@ -4003,6 +4319,14 @@ msgstr ""
 msgid "Contact of ${person}"
 msgstr ""
 
+#: /src/schooltool/contact/browser/templates/f_children_overview.pt:2
+msgid "Children"
+msgstr ""
+
+#: /src/schooltool/contact/browser/templates/f_children_overview.pt:9
+msgid "overview."
+msgstr ""
+
 #: /src/schooltool/contact/browser/templates/f_confirm_delete_contact.pt:3
 msgid "Deleting a contact is permanent and irreversible."
 msgstr ""
@@ -4012,12 +4336,8 @@ msgstr ""
 msgid "${relationship} of"
 msgstr ""
 
-#: /src/schooltool/contact/browser/templates/f_confirm_delete_contact.pt:16
-#: /src/schooltool/contact/browser/templates/f_contact_view.pt:49
-msgid "Contact of"
-msgstr ""
-
-#: /src/schooltool/contact/browser/templates/f_contact_view.pt:3
+#: /src/schooltool/contact/browser/templates/f_contact_details.pt:3
+#: /src/schooltool/contact/browser/templates/f_contact_view.pt:7
 msgid "Contact information"
 msgstr ""
 
@@ -4144,7 +4464,40 @@ msgstr ""
 msgid "Instructors of student(s) related to this contact."
 msgstr ""
 
-#: /src/schooltool/contact/interfaces.py:53
+#: /src/schooltool/contact/contact.py:237
+#: /src/schooltool/export/importer.py:1123
+msgid "Contact Relationships"
+msgstr ""
+
+#: /src/schooltool/contact/contact.py:242
+msgid "Step-parent"
+msgstr ""
+
+#: /src/schooltool/contact/contact.py:243
+msgid "Foster parent"
+msgstr ""
+
+#: /src/schooltool/contact/contact.py:244
+msgid "Guardian"
+msgstr ""
+
+#: /src/schooltool/contact/contact.py:245
+msgid "Sibling"
+msgstr ""
+
+#: /src/schooltool/contact/contact.py:248
+msgid "A contact"
+msgstr ""
+
+#: /src/schooltool/contact/contact.py:249
+msgid "A parent"
+msgstr ""
+
+#: /src/schooltool/contact/contact.py:251
+msgid "Inactive parent"
+msgstr ""
+
+#: /src/schooltool/contact/interfaces.py:64
 msgid "Address line 1"
 msgstr ""
 
@@ -4156,11 +4509,7 @@ msgstr ""
 msgid "City"
 msgstr "도시"
 
-#: /src/schooltool/contact/interfaces.py:59
-msgid "State"
-msgstr ""
-
-#: /src/schooltool/contact/interfaces.py:61
+#: /src/schooltool/contact/interfaces.py:72
 msgid "Country"
 msgstr "국가"
 
@@ -4188,33 +4537,9 @@ msgstr ""
 msgid "Other 2"
 msgstr ""
 
-#: /src/schooltool/contact/interfaces.py:109
-msgid "Contact's relationship with the person"
-msgstr ""
-
-#: /src/schooltool/contact/interfaces.py:104
-msgid "Parent"
-msgstr ""
-
-#: /src/schooltool/contact/interfaces.py:105
-msgid "Step-parent"
-msgstr ""
-
-#: /src/schooltool/contact/interfaces.py:106
-msgid "Foster parent"
-msgstr ""
-
-#: /src/schooltool/contact/interfaces.py:107
-msgid "Guardian"
-msgstr ""
-
-#: /src/schooltool/contact/interfaces.py:108
-msgid "Sibling"
-msgstr ""
-
-#: /src/schooltool/contact/security.zcml:29
+#: /src/schooltool/contact/security.zcml:47
 #: /src/schooltool/person/security.zcml:73
-#: /src/schooltool/timetable/security.zcml:38
+#: /src/schooltool/timetable/security.zcml:58
 msgid "List/Search"
 msgstr ""
 
@@ -4531,7 +4856,11 @@ msgstr ""
 msgid "Add instructors"
 msgstr ""
 
-#: /src/schooltool/course/browser/section.py:1329
+#: /src/schooltool/course/browser/section.py:1619
+msgid "Enroll ${target}"
+msgstr ""
+
+#: /src/schooltool/course/browser/section.py:1625
 msgid "Current students"
 msgstr ""
 
@@ -4594,10 +4923,6 @@ msgstr ""
 
 #: /src/schooltool/course/browser/templates/copy_sections.pt:66
 msgid "Select All Visible"
-msgstr ""
-
-#: /src/schooltool/course/browser/templates/copy_sections.pt:70
-msgid "Select None"
 msgstr ""
 
 #: /src/schooltool/course/browser/templates/copy_sections.pt:74
@@ -4715,6 +5040,14 @@ msgstr ""
 msgid "Extend"
 msgstr ""
 
+#: /src/schooltool/course/browser/templates/f_completedcoursesviewlet.pt:6
+msgid "Completed Courses"
+msgstr ""
+
+#: /src/schooltool/course/browser/templates/f_completedcoursesviewlet.pt:28
+msgid "${amount} credits"
+msgstr ""
+
 #: /src/schooltool/course/browser/templates/f_confirm_delete_course.pt:1
 msgid ""
 "Deleting a course is permanent, irreversible, and destroys all data "
@@ -4749,6 +5082,10 @@ msgid ""
 "upload a CSV with titles or course ids that are already present in the "
 "database, existing courses will be updated. Course Ids take precedence when "
 "determining which course should be updated."
+msgstr ""
+
+#: /src/schooltool/course/browser/templates/f_course_table_filter.pt:41
+msgid "All levels"
 msgstr ""
 
 #: /src/schooltool/course/browser/templates/f_course_view.pt:4
@@ -5101,7 +5438,22 @@ msgstr ""
 msgid "An internal identifier of this section."
 msgstr ""
 
-#: /src/schooltool/course/section.py:89
+#: /src/schooltool/course/interfaces.py:168
+#: /src/schooltool/course/section.py:470
+msgid "Completed"
+msgstr ""
+
+#: /src/schooltool/course/parent.py:41
+#: /src/schooltool/course/section.py:316
+msgid "Learners"
+msgstr ""
+
+#: /src/schooltool/course/parent.py:42
+#: /src/schooltool/course/section.py:317
+msgid "Students of the section."
+msgstr ""
+
+#: /src/schooltool/course/section.py:95
 msgid "${instructors} -- ${section_title}"
 msgstr ""
 
@@ -5121,27 +5473,45 @@ msgstr ""
 msgid "Instructors of a person in any of his sections."
 msgstr ""
 
-#: /src/schooltool/course/section.py:310
-msgid "Learners"
-msgstr ""
-
-#: /src/schooltool/course/section.py:311
-msgid "Students of the section."
-msgstr ""
-
-#: /src/schooltool/course/section.py:389
+#: /src/schooltool/course/section.py:397
 msgid "Cannot link sections in same term"
 msgstr ""
 
-#: /src/schooltool/course/section.py:394
+#: /src/schooltool/course/section.py:402
 msgid "Cannot link sections in different school years"
 msgstr ""
 
-#: /src/schooltool/course/section.py:398
+#: /src/schooltool/course/section.py:406
 msgid "Sections must be in consecutive terms"
 msgstr ""
 
-#: /src/schooltool/course/security.zcml:38
+#: /src/schooltool/course/section.py:464
+#: /src/schooltool/export/export.py:891
+#: /src/schooltool/export/importer.py:1627
+msgid "Section Enrollment"
+msgstr ""
+
+#: /src/schooltool/course/section.py:473
+msgid "Completed/Active"
+msgstr ""
+
+#: /src/schooltool/course/section.py:474
+msgid "Completed/Inactive"
+msgstr ""
+
+#: /src/schooltool/course/section.py:481
+msgid "Section Instruction"
+msgstr ""
+
+#: /src/schooltool/course/section.py:485
+msgid "Substitute"
+msgstr ""
+
+#: /src/schooltool/course/section.py:488
+msgid "Instructing"
+msgstr ""
+
+#: /src/schooltool/course/security.zcml:42
 msgid "Only clerks can modify the section."
 msgstr ""
 
@@ -5283,19 +5653,13 @@ msgstr ""
 msgid "Server Status"
 msgstr ""
 
-#: /src/schooltool/email/browser/email.py:102
-#: /src/schooltool/email/interfaces.py:87
-msgid "Enable"
-msgstr ""
-
-#: /src/schooltool/email/browser/email.py:107
-#: /src/schooltool/email/browser/templates/f_email_settings_overview.pt:17
-#: /src/schooltool/email/interfaces.py:92
+#: /src/schooltool/email/browser/email.py:106
+#: /src/schooltool/email/interfaces.py:91
 msgid "Hostname"
 msgstr ""
 
-#: /src/schooltool/email/browser/email.py:108
-#: /src/schooltool/email/interfaces.py:93
+#: /src/schooltool/email/browser/email.py:107
+#: /src/schooltool/email/interfaces.py:92
 msgid "SMTP server hostname. Required if the service is enabled."
 msgstr ""
 
@@ -5499,18 +5863,10 @@ msgid "Email Details"
 msgstr ""
 
 #: /src/schooltool/email/interfaces.py:44
-msgid "Recipient addresses"
-msgstr ""
-
-#: /src/schooltool/email/interfaces.py:45
 msgid "Recipient address"
 msgstr ""
 
 #: /src/schooltool/email/interfaces.py:58
-msgid "Status"
-msgstr ""
-
-#: /src/schooltool/email/interfaces.py:59
 msgid "Code for the status of the message"
 msgstr ""
 
@@ -5593,12 +5949,21 @@ msgstr ""
 msgid "School Years"
 msgstr "학년"
 
-#: /src/schooltool/export/export.py:835
-#: /src/schooltool/export/importer.py:1518
-msgid "Section Enrollment"
+#: /src/schooltool/export/export.py:881
+#: /src/schooltool/export/importer.py:857
+#: /src/schooltool/level/browser/flourish.zcml:19
+#: /src/schooltool/level/browser/flourish.zcml:28
+#: /src/schooltool/level/browser/flourish.zcml:34
+#: /src/schooltool/level/browser/flourish.zcml:82
+#: /src/schooltool/level/browser/flourish.zcml:92
+#: /src/schooltool/level/browser/flourish.zcml:110
+#: /src/schooltool/level/browser/flourish.zcml:130
+#: /src/schooltool/level/browser/templates/levels.pt:3
+#: /src/schooltool/level/browser/templates/levels.pt:6
+msgid "Grade Levels"
 msgstr ""
 
-#: /src/schooltool/export/export.py:837
+#: /src/schooltool/export/export.py:893
 msgid "Section Schedules"
 msgstr ""
 
@@ -5622,7 +5987,14 @@ msgstr ""
 msgid "XLS export"
 msgstr ""
 
-#: /src/schooltool/export/flourish.zcml:32
+#: /src/schooltool/export/export.py:989
+#: /src/schooltool/export/templates/f_import.pt:38
+#: /src/schooltool/export/templates/f_import_remote.pt:25
+#: /src/schooltool/export/templates/import.pt:54
+msgid "Upload XLS File"
+msgstr ""
+
+#: /src/schooltool/export/flourish.zcml:43
 msgid "Import XLS"
 msgstr ""
 
@@ -5770,15 +6142,19 @@ msgstr ""
 msgid "is not a valid resource id"
 msgstr ""
 
-#: /src/schooltool/export/importer.py:110
+#: /src/schooltool/export/importer.py:139
+msgid "is not a valid grade level id"
+msgstr ""
+
+#: /src/schooltool/export/importer.py:140
 msgid "Username cannot contain non-ascii characters"
 msgstr ""
 
-#: /src/schooltool/export/importer.py:111
-msgid "is not a valid contact relationship"
+#: /src/schooltool/export/importer.py:141
+msgid "is not a valid relationship code"
 msgstr ""
 
-#: /src/schooltool/export/importer.py:113
+#: /src/schooltool/export/importer.py:142
 msgid ""
 "must be either TRUE, FALSE, YES or NO (upper, lower and mixed case are all "
 "valid)"
@@ -5860,11 +6236,7 @@ msgstr ""
 msgid "Contact Persons"
 msgstr ""
 
-#: /src/schooltool/export/importer.py:1010
-msgid "Contact Relationships"
-msgstr ""
-
-#: /src/schooltool/export/importer.py:1579
+#: /src/schooltool/export/importer.py:1729
 msgid "Section Timetables"
 msgstr ""
 
@@ -5881,9 +6253,17 @@ msgstr ""
 msgid "Overall"
 msgstr ""
 
-#: /src/schooltool/export/interfaces.py:34
+#: /src/schooltool/export/importer.py:2308
+msgid "import spreadsheet"
+msgstr ""
+
+#: /src/schooltool/export/importer.py:2452
+msgid "XLS import"
+msgstr ""
+
+#: /src/schooltool/export/interfaces.py:58
 #: /src/schooltool/export/templates/f_import.pt:42
-#: /src/schooltool/export/templates/f_import_remote.pt:28
+#: /src/schooltool/export/templates/f_import_remote.pt:29
 #: /src/schooltool/export/templates/import.pt:56
 msgid "XLS File"
 msgstr ""
@@ -5892,11 +6272,112 @@ msgstr ""
 msgid "Please wait while the data is being imported."
 msgstr ""
 
-#: /src/schooltool/export/templates/f_import.pt:36
-#: /src/schooltool/export/templates/import.pt:59
-msgid "Upload XLS File"
+#: /src/schooltool/export/templates/f_import_finished_long.pt:3
+msgid "Importing..."
 msgstr ""
 
+#: /src/schooltool/export/templates/f_import_finished_long.pt:4
+msgid "System failure during import"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:7
+msgid "Import failed due to errors"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:8
+msgid "Import completed"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:32
+msgid ""
+"You can also download the spreadsheet at any time from your ${home-link}."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:32
+#: /src/schooltool/export/templates/f_import_task_progress.pt:60
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:15
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:49
+msgid "home page"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:39
+#: /src/schooltool/report/browser/report.py:242
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:22
+msgid "Download"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:50
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:33
+#: /src/schooltool/report/browser/templates/f_short_report_message.pt:17
+msgid "Generating ${report}..."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:58
+#: /src/schooltool/export/templates/f_import_task_progress.pt:21
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:41
+#: /src/schooltool/task/browser/templates/f_short_fail_message.pt:3
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:19
+msgid "System failure."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:62
+#: /src/schooltool/export/templates/f_import_finished_short.pt:30
+#: /src/schooltool/export/templates/f_import_generating_short.pt:16
+#: /src/schooltool/export/templates/f_import_task_progress.pt:38
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:45
+#: /src/schooltool/report/browser/templates/f_short_report_message.pt:31
+#: /src/schooltool/task/browser/templates/f_short_fail_message.pt:6
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:27
+msgid "Ticket nr. ${ticket_id}."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:66
+#: /src/schooltool/export/templates/f_import_finished_short.pt:33
+#: /src/schooltool/export/templates/f_import_generating_short.pt:19
+#: /src/schooltool/export/templates/f_import_task_progress.pt:40
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:49
+#: /src/schooltool/report/browser/templates/f_short_report_message.pt:34
+#: /src/schooltool/task/browser/templates/f_short_fail_message.pt:9
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:29
+msgid "Please contact your administrator."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_long.pt:72
+#: /src/schooltool/export/templates/f_import_task_progress.pt:48
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:55
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:37
+msgid "Failure details..."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_short.pt:4
+msgid "Import successful."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_short.pt:12
+msgid "Import failed with ${errors}"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_short.pt:14
+msgid "${amount} errors"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_short.pt:25
+#: /src/schooltool/export/templates/f_import_generating_short.pt:11
+msgid "System failure while importing."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_short.pt:41
+#: /src/schooltool/report/browser/templates/f_short_report_message.pt:7
+msgid "Download ${report} ${link}."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_finished_short.pt:47
+#: /src/schooltool/export/templates/f_import_generating_short.pt:24
+#: /src/schooltool/report/browser/templates/f_short_report_message.pt:37
+msgid "Details..."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_generating_short.pt:4
 #: /src/schooltool/export/templates/f_import_progress.pt:13
 msgid "Import scheduled."
 msgstr ""
@@ -5965,6 +6446,34 @@ msgid ""
 "We also provide a large data set: ${link-to-sample-data-file} -- 1000 "
 "students over multiple years -- for performance testing. This set can take a "
 "very long time to be imported and may fail on systems with inadequate memory."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_task_progress.pt:8
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:8
+msgid "Scheduled."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_task_progress.pt:14
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:14
+msgid "Completed."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_task_progress.pt:28
+msgid "System failure importing ${file_link}"
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_task_progress.pt:60
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:49
+msgid ""
+"You can close this dialog and download the exported data later from your "
+"${home-link}."
+msgstr ""
+
+#: /src/schooltool/export/templates/f_import_task_progress.pt:75
+#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:72
+#: /src/schooltool/task/browser/templates/f_task_progress.pt:64
+#: /src/schooltool/task/browser/templates/task_dialog.pt:11
+msgid "Close"
 msgstr ""
 
 #: /src/schooltool/export/templates/import.pt:4
@@ -6049,7 +6558,11 @@ msgstr ""
 msgid "Add Members"
 msgstr ""
 
-#: /src/schooltool/group/browser/group.py:290
+#: /src/schooltool/group/browser/group.py:284
+msgid "Assign to ${target}"
+msgstr ""
+
+#: /src/schooltool/group/browser/group.py:286
 msgid "Current groups"
 msgstr ""
 
@@ -6251,23 +6764,8 @@ msgstr ""
 msgid "Groups are essentially sets of users."
 msgstr ""
 
-#: /src/schooltool/level/browser/flourish.zcml:19
-#: /src/schooltool/level/browser/flourish.zcml:28
-#: /src/schooltool/level/browser/flourish.zcml:34
 #: /src/schooltool/level/browser/flourish.zcml:82
-#: /src/schooltool/level/browser/flourish.zcml:92
-#: /src/schooltool/level/browser/flourish.zcml:110
-#: /src/schooltool/level/browser/flourish.zcml:130
-#: /src/schooltool/level/browser/templates/levels.pt:3
-#: /src/schooltool/level/browser/templates/levels.pt:6
-msgid "Grade Levels"
-msgstr ""
-
-#: /src/schooltool/level/browser/flourish.zcml:62
-msgid "Level"
-msgstr ""
-
-#: /src/schooltool/level/browser/flourish.zcml:82
+#: /src/schooltool/level/browser/level.py:50
 msgid "Add new level"
 msgstr ""
 
@@ -6604,11 +7102,7 @@ msgstr ""
 msgid "Section Reports"
 msgstr ""
 
-#: /src/schooltool/report/browser/report.py:200
-msgid "Download"
-msgstr ""
-
-#: /src/schooltool/report/browser/report.py:300
+#: /src/schooltool/report/browser/report.py:299
 #: /src/schooltool/sampledata/sampledata.pt:80
 msgid "Generate"
 msgstr "생성"
@@ -6660,42 +7154,6 @@ msgid ""
 "link}."
 msgstr ""
 
-#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:15
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:41
-msgid "home page"
-msgstr ""
-
-#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:33
-#: /src/schooltool/report/browser/templates/f_short_report_message.pt:17
-msgid "Generating ${report}..."
-msgstr ""
-
-#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:41
-#: /src/schooltool/task/browser/templates/f_short_fail_message.pt:3
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:19
-msgid "System failure."
-msgstr ""
-
-#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:45
-#: /src/schooltool/report/browser/templates/f_short_report_message.pt:31
-#: /src/schooltool/task/browser/templates/f_short_fail_message.pt:6
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:27
-msgid "Ticket nr. ${ticket_id}."
-msgstr ""
-
-#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:49
-#: /src/schooltool/report/browser/templates/f_short_report_message.pt:34
-#: /src/schooltool/task/browser/templates/f_short_fail_message.pt:9
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:29
-msgid "Please contact your administrator."
-msgstr ""
-
-#: /src/schooltool/report/browser/templates/f_download_report_dialog.pt:64
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:56
-#: /src/schooltool/task/browser/templates/task_dialog.pt:11
-msgid "Close"
-msgstr ""
-
 #: /src/schooltool/report/browser/templates/f_report_reference.pt:5
 #: /src/schooltool/report/browser/templates/report_reference.pt:13
 msgid "Category"
@@ -6704,10 +7162,6 @@ msgstr ""
 #: /src/schooltool/report/browser/templates/f_report_reference.pt:7
 #: /src/schooltool/report/browser/templates/f_request_report_download.pt:11
 msgid "File Type"
-msgstr ""
-
-#: /src/schooltool/report/browser/templates/f_short_report_message.pt:7
-msgid "Download ${report} ${link}."
 msgstr ""
 
 #: /src/schooltool/report/browser/templates/f_short_report_message.pt:27
@@ -7200,11 +7654,7 @@ msgstr ""
 msgid "Last Day"
 msgstr ""
 
-#: /src/schooltool/schoolyear/browser/schoolyear.py:216
-msgid "Active"
-msgstr ""
-
-#: /src/schooltool/schoolyear/browser/schoolyear.py:237
+#: /src/schooltool/schoolyear/browser/schoolyear.py:247
 msgid "Delete ${schoolyear}"
 msgstr ""
 
@@ -7490,7 +7940,11 @@ msgstr "누구든지"
 msgid "Users who did not log in"
 msgstr ""
 
-#: /src/schooltool/securitypolicy/crowds.py:250
+#: /src/schooltool/securitypolicy/crowds.py:249
+msgid "Logged In"
+msgstr ""
+
+#: /src/schooltool/securitypolicy/crowds.py:260
 msgid "Super user"
 msgstr ""
 
@@ -7690,20 +8144,6 @@ msgstr ""
 msgid "Scheduled"
 msgstr ""
 
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:8
-msgid "Scheduled."
-msgstr ""
-
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:14
-msgid "Completed."
-msgstr ""
-
-#: /src/schooltool/task/browser/templates/f_task_progress.pt:41
-msgid ""
-"You can close this dialog and download the exported data later from your "
-"${home-link}."
-msgstr ""
-
 #: /src/schooltool/task/browser/templates/task_status.pt:15
 msgid "Task pending or removed"
 msgstr ""
@@ -7730,10 +8170,6 @@ msgstr ""
 #: /src/schooltool/task/browser/templates/task_status.pt:38
 #: /src/schooltool/task/interfaces.py:49
 msgid "Persisted result"
-msgstr ""
-
-#: /src/schooltool/task/security.zcml:24
-msgid "Messages"
 msgstr ""
 
 #: /src/schooltool/task/security.zcml:29
@@ -8432,12 +8868,7 @@ msgstr ""
 msgid "Last term"
 msgstr ""
 
-#: /src/schooltool/timetable/browser/timetable.py:678
-#: /src/schooltool/timetable/browser/timetable.py:821
-msgid "Save"
-msgstr "저장"
-
-#: /src/schooltool/timetable/browser/timetable.py:619
+#: /src/schooltool/timetable/browser/timetable.py:851
 msgid "Unschedule timetable ${timetable}"
 msgstr ""
 
@@ -8669,9 +9100,3 @@ msgstr "학교 시간표"
 #: /src/schooltool/widget/password.py:55
 msgid "Supplied passwords are not identical"
 msgstr "암호가 맞지 않습니다."
-
-#~ msgid "Calendar Preferences"
-#~ msgstr "캘린더 환경설정"
-
-#~ msgid "Edit site preferences"
-#~ msgstr "사이트 환경 설정 편집"
