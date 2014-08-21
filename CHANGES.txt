@@ -7,6 +7,7 @@ CHANGES
 
 - Avoid insecure content warning for fonts.googleapis.com when accessing
   schooltool through https (https://launchpad.net/bugs/1330106)
+- Updated translations
 
 
 2.8.0 (2014-05-08)
