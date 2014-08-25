@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from zope.app.dependable.interfaces import IDependable
 from zope.interface import implements, implementer
 from zope.component import adapts, adapter
 from zope.component import getAdapter, getMultiAdapter
@@ -26,6 +27,7 @@ from zope.traversing.browser.absoluteurl import absoluteURL
 from zope.container.interfaces import INameChooser
 from zope.browserpage.viewpagetemplatefile import ViewPageTemplateFile
 from zope.schema import ValidationError
+from zope.security.proxy import removeSecurityProxy
 
 from z3c.form.interfaces import ITextAreaWidget
 from z3c.form import form, field, button, validator
@@ -380,12 +382,15 @@ class FlourishReorderDemographicsView(flourish.page.Page, DemographicsView):
         pos = 0
         result = []
         for demo in self.context.values():
+            dependable = IDependable(removeSecurityProxy(demo), None)
+            removable = dependable is None or not dependable.dependents()
             pos += 1
             result.append({
-                    'name': demo.__name__,
-                   'title': demo.title,
-                   'pos': pos,
-                    })
+                'name': demo.__name__,
+                'title': demo.title,
+                'pos': pos,
+                'removable': removable,
+            })
         return result
 
     def update(self):

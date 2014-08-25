@@ -23,6 +23,7 @@ import os
 
 from schooltool.testing.selenium import SeleniumLayer
 from schooltool.testing.selenium import add_temporal_relationship
+from schooltool.testing.selenium import print_tree
 
 dir = os.path.abspath(os.path.dirname(__file__))
 filename = os.path.join(dir, 'stesting.zcml')
@@ -105,6 +106,34 @@ def registerSeleniumSetup():
     registry.register('SeleniumHelpers',
         lambda: schooltool.testing.selenium.registerBrowserUI(
             'person.advisees.add', addAdvisees))
+
+    def printSectionTrees(browser):
+        accordion_header = browser.query_all.css('.ui-accordion-header')[3]
+        accordion_header.click()
+        accordion_content = browser.query_all.css('div.ui-accordion-content')[3]
+        browser.wait(accordion_content.is_displayed)
+        for block in accordion_content.query_all.css('.info-block'):
+            print block.query.tag('h3').text
+            tree = block.query.css('.tree_list > ul')
+            print_tree(tree)
+
+    registry.register('SeleniumHelpers',
+        lambda: schooltool.testing.selenium.registerBrowserUI(
+            'person.print_section_trees', printSectionTrees))
+
+    def printGroupTrees(browser):
+        accordion_header = browser.query_all.css('.ui-accordion-header')[4]
+        accordion_header.click()
+        accordion_content = browser.query_all.css('div.ui-accordion-content')[4]
+        browser.wait(accordion_content.is_displayed)
+        print accordion_content.query.tag('h3').text
+        tree = accordion_content.query.css('.tree_list > ul')
+        print_tree(tree)
+
+    registry.register('SeleniumHelpers',
+        lambda: schooltool.testing.selenium.registerBrowserUI(
+            'person.print_group_trees', printGroupTrees))
+
 
 registerSeleniumSetup()
 del registerSeleniumSetup

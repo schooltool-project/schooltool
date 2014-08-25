@@ -37,6 +37,7 @@ from zope.security.proxy import removeSecurityProxy
 
 from schooltool.app import membership
 from schooltool.app.relationships import URIInstruction, URISection
+from schooltool.app.relationships import Instruction
 from schooltool.app.app import InitBase
 from schooltool.app import relationships
 from schooltool.app.security import ConfigurableCrowd
@@ -54,6 +55,7 @@ from schooltool.schoolyear.subscriber import EventAdapterSubscriber
 from schooltool.schoolyear.subscriber import ObjectEventAdapterSubscriber
 from schooltool.schoolyear.interfaces import ISubscriber
 from schooltool.schoolyear.interfaces import ISchoolYear
+from schooltool.schoolyear.interfaces import ISchoolYearContainer
 from schooltool.term.term import getNextTerm
 from schooltool.term.interfaces import ITerm
 
@@ -486,3 +488,45 @@ class SectionInstructorStatesStartup(StateStartUpBase):
         states.add(_('Added in error'), INACTIVE, 'e')
         states.describe(ACTIVE, _('Instructing'))
         states.describe(INACTIVE, _('Removed'))
+
+
+def get_active_year():
+    schoolyears = ISchoolYearContainer(ISchoolToolApplication(None))
+    return schoolyears.getActiveSchoolYear()
+
+
+def is_teacher(person, only_active_year=False):
+    active = get_active_year()
+    person = removeSecurityProxy(person)
+    is_wanted_group = lambda g: (g.__name__ == 'teachers' and
+                                 not interfaces.ISection.providedBy(g))
+    group_relation = membership.Membership
+    for link_info in group_relation.bind(member=person).all().relationships:
+        target = removeSecurityProxy(link_info.target)
+        if (is_wanted_group(target) and
+            (not only_active_year or
+             ISchoolYear(target.__parent__) == active)):
+            return True
+    for link_info in Instruction.bind(instructor=person).all().relationships:
+        target = removeSecurityProxy(link_info.target)
+        schoolyear = ISchoolYear(ITerm(target))
+        if not only_active_year or schoolyear == active:
+            return True
+    return False
+
+
+def is_student(person, only_active_year=False):
+    active = get_active_year()
+    person = removeSecurityProxy(person)
+    group_relation = membership.Membership
+    for link_info in group_relation.bind(member=person).all().relationships:
+        target = removeSecurityProxy(link_info.target)
+        schoolyear = None
+        if interfaces.ISection.providedBy(target):
+            schoolyear = ISchoolYear(ITerm(target))
+        elif target.__name__ == 'students':
+            schoolyear = ISchoolYear(target.__parent__)
+        if (schoolyear is not None and
+            (not only_active_year or schoolyear == active)):
+            return True
+    return False

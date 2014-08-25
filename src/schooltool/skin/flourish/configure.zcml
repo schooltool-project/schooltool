@@ -129,6 +129,29 @@
       />
   </zope:resourceLibrary>
 
+  <zope:resourceLibrary
+      name="schooltool.flourish.custom"
+      require=""
+      layer="schooltool.skin.flourish.IFlourishLayer">
+    <directory
+        source="custom"
+        />
+  </zope:resourceLibrary>
+
+  <flourish:viewletManager
+      name="html_head"
+      for="*"
+      class=".page.HTMLHeadViewletManager"
+      permission="zope.Public"
+      />
+
+  <flourish:viewlet
+      name="custom_css"
+      manager=".page.HTMLHeadViewletManager"
+      class=".page.CustomCSSViewlet"
+      permission="zope.Public"
+      />
+
   <!-- Content provider machinery -->
 
   <zope:adapter

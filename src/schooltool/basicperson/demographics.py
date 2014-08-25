@@ -21,6 +21,8 @@ Demographics fields and storage
 from persistent.dict import PersistentDict
 from persistent import Persistent
 
+from zope.annotation.interfaces import IAttributeAnnotatable
+from zope.app.dependable.interfaces import IDependable
 from zope.schema._field import Choice
 from zope.schema._field import Date
 from zope.schema import TextLine, Bool
@@ -51,6 +53,8 @@ from schooltool.basicperson.interfaces import IDemographics
 from schooltool.basicperson.interfaces import IFieldDescription
 from schooltool.common import SchoolToolMessage as _
 
+
+LEAVE_SCHOOL_FIELDS = ['leave_date', 'leave_reason', 'leave_destination']
 
 class IDemographicsForm(Interface):
     """Interface for fields that are supposed to get stored in person demographics."""
@@ -146,6 +150,31 @@ class DemographicsFields(OrderedContainer):
         return result
 
 
+def setUpLeaveSchoolDemographics(app):
+    dfs = app.get('schooltool.basicperson.demographics_fields')
+    if dfs is None:
+        return
+    dfs['leave_date'] = DateFieldDescription(
+        'leave_date', _('Date of un-enrollment'),
+        limit_keys=['students'])
+    dfs['leave_reason'] = EnumFieldDescription(
+        'leave_reason', _('Reason for un-enrollment'),
+        limit_keys=['students'])
+    dfs['leave_reason'].items = [_('Transferred'),
+                                 _('Dropped-out - fees'),
+                                 _('Dropped-out - pregnancy'),
+                                 _('Dropped-out - family'),
+                                 _('Left school - unknown')]
+    dfs['leave_destination'] = EnumFieldDescription(
+        'leave_destination', _('Destination school'),
+        limit_keys=['students'])
+    dfs['leave_destination'].items = [_('Example School A'),
+                                      _('Example School B')]
+    for name in LEAVE_SCHOOL_FIELDS:
+        if name in dfs:
+            IDependable(dfs[name]).addDependent('')
+
+
 def setUpDefaultDemographics(app):
     dfs = DemographicsFields()
     app['schooltool.basicperson.demographics_fields'] = dfs
@@ -160,6 +189,7 @@ def setUpDefaultDemographics(app):
     dfs['language'] = TextFieldDescription('language', _('Language'))
     dfs['placeofbirth'] = TextFieldDescription('placeofbirth', _('Place of birth'))
     dfs['citizenship'] = TextFieldDescription('citizenship', _('Citizenship'))
+    setUpLeaveSchoolDemographics(app)
 
 
 class DemographicsAppStartup(StartUpBase):
@@ -183,7 +213,8 @@ def getDemographicsFields(app):
 
 
 class FieldDescription(Persistent, Location):
-    implements(IFieldDescription)
+    implements(IFieldDescription, IAttributeAnnotatable)
+
     limit_keys = []
     description = None
 

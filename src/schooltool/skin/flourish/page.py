@@ -32,6 +32,8 @@ from zope.traversing.api import getParent
 from zope.traversing.browser.interfaces import IAbsoluteURL
 from zope.traversing.browser.absoluteurl import absoluteURL, AbsoluteURL
 
+import zc.resourcelibrary
+
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.app.interfaces import IApplicationTabs
 from schooltool.skin.flourish.viewlet import Viewlet, ViewletManager
@@ -522,3 +524,18 @@ class ModalFormLinkViewlet(LinkIdViewlet):
     @property
     def form_container_id(self):
         return '%s-container' % self.html_id
+
+
+class HTMLHeadViewletManager(ViewletManager):
+
+    def update(self):
+        zc.resourcelibrary.need('schooltool.flourish.custom')
+        super(HTMLHeadViewletManager, self).update()
+
+
+class CustomCSSViewlet(Viewlet):
+
+    render = templates.Inline('''
+      <link rel="stylesheet" type="text/css" href="layout.css" media="screen"
+            tal:attributes="href context/++resource++schooltool.flourish.custom/custom.css" />
+    ''')
