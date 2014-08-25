@@ -70,7 +70,7 @@
       class="schooltool.report.browser.report.ReportsLinks"
       title="Reports"
       view="schooltool.schoolyear.browser.schoolyear.FlourishSchoolYearView"
-      permission="schooltool.edit"
+      permission="schooltool.view"
       />
 
   <flourish:viewlet

@@ -2,6 +2,7 @@
 <configure xmlns="http://namespaces.zope.org/browser"
            xmlns:flourish="http://schooltool.org/flourish"
            xmlns:zope="http://namespaces.zope.org/zope"
+           xmlns:security="http://schooltool.org/securitypolicy"
            i18n_domain="schooltool">
 
   <flourish:activeViewlet
@@ -113,6 +114,11 @@
       manager="schooltool.skin.flourish.page.IPageContentManager"
       class=".schoolyear.FlourishManageYearOverview"
       />
+
+  <security:allow
+     interface=".schoolyear.FlourishManageYearOverview"
+     crowds="administrators clerks"
+     permission="schooltool.edit" />
 
   <flourish:page
       name="index.html"
