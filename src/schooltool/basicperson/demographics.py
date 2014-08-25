@@ -161,10 +161,7 @@ def setUpLeaveSchoolDemographics(app):
         'leave_reason', _('Reason for un-enrollment'),
         limit_keys=['students'])
     dfs['leave_reason'].items = [_('Transferred'),
-                                 _('Dropped-out - fees'),
-                                 _('Dropped-out - pregnancy'),
-                                 _('Dropped-out - family'),
-                                 _('Left school - unknown')]
+                                 _('Dropped out')]
     dfs['leave_destination'] = EnumFieldDescription(
         'leave_destination', _('Destination school'),
         limit_keys=['students'])
