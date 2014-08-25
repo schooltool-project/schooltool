@@ -33,6 +33,7 @@ from schooltool import table
 from schooltool.skin import flourish
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.app.interfaces import IRelationshipStateContainer
+from schooltool.app.membership import URIMembership
 from schooltool.app.states import RelationshipStateChoice
 from schooltool.app.states import ACTIVE
 from schooltool.app.states import INACTIVE
@@ -41,6 +42,8 @@ from schooltool.app.browser.app import RelationshipAddTableMixin
 from schooltool.app.browser.app import RelationshipRemoveTableMixin
 from schooltool.app.browser.app import AddAllResultsButton
 from schooltool.app.browser.app import RemoveAllResultsButton
+from schooltool.group.interfaces import IGroup
+from schooltool.course.interfaces import ISection
 
 from schooltool.common import format_message, parse_date
 from schooltool.common import SchoolToolMessage as _
@@ -107,16 +110,26 @@ def get_state_column_formatter(table):
     return cell_formatter
 
 
+def use_student_enrollment_states(other, collection):
+    other = removeSecurityProxy(other)
+    collection = removeSecurityProxy(collection)
+    return (getattr(other, '__name__') == 'students' and
+            collection.rel_type == URIMembership and
+            IGroup.providedBy(other) and
+            not ISection.providedBy(other))
+
+
 class TemporalRelationshipRemoveTableMixin(RelationshipRemoveTableMixin):
 
     button_title = _('Update')
     button_image = 'edit-icon.png'
 
     def makeTextGetter(self):
-        settings = self.view.states
-        if settings is None:
+        states = self.view.states
+        container = states.__parent__
+        if states is None:
             return None
-        collection = self.view.getCollection()
+        collection = removeSecurityProxy(self.view.getCollection())
         def text(item, formatter=None):
             state = collection.state(removeSecurityProxy(item))
             if state is None:
@@ -125,6 +138,10 @@ class TemporalRelationshipRemoveTableMixin(RelationshipRemoveTableMixin):
             if state_today is None:
                 return ''
             active, code = state_today
+            if use_student_enrollment_states(item, collection):
+                settings = container['student-enrollment']
+            else:
+                settings = states
             description = settings.states.get(code)
             if description is None:
                 return ''
@@ -226,7 +243,10 @@ class StateActionDialog(DialogFormWithScript):
         if target is None:
             return []
         app_states = self.app_states
+        container = app_states.__parent__
         relationships = removeSecurityProxy(self.view.getCollection())
+        if use_student_enrollment_states(target, relationships):
+            app_states = container['student-enrollment']
         states = []
         for date, active, code in relationships.state(target) or ():
             state = app_states.states.get(code)

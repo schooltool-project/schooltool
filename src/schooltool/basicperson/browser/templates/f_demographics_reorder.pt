@@ -32,6 +32,7 @@
         <td tal:content="demo/name" />
         <td>
           <button class="image" type="submit" title="Delete" value="1"
+                  tal:condition="demo/removable"
                   tal:attributes="name string:delete.${demo/name};"
                   i18n:attributes="title">
             <img alt="Delete" i18n:attributes="alt"

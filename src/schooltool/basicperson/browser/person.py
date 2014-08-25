@@ -33,7 +33,7 @@ from z3c.form.interfaces import DISPLAY_MODE
 from zope.interface import invariant, Invalid
 from zope.interface import directlyProvides
 from zope.intid.interfaces import IIntIds
-from zope.schema import Password, TextLine, Choice, List
+from zope.schema import Password, TextLine, Choice, List, Date
 from zope.schema import ValidationError
 from zope.schema.interfaces import ITitledTokenizedTerm
 from zope.traversing.browser.absoluteurl import absoluteURL
@@ -60,13 +60,19 @@ from schooltool.app.browser.report import DefaultPageTemplate
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.app.interfaces import IApplicationPreferences
 from schooltool.app.interfaces import IRelationshipStateContainer
+from schooltool.app.membership import Membership
+from schooltool.app.states import INACTIVE
 from schooltool.common.inlinept import InlineViewPageTemplate
 from schooltool.common.inlinept import InheritTemplate
+from schooltool.course.interfaces import ISection
+from schooltool.course.section import is_student
+from schooltool.basicperson.demographics import LEAVE_SCHOOL_FIELDS
 from schooltool.basicperson.interfaces import IDemographics
 from schooltool.basicperson.interfaces import IDemographicsFields
 from schooltool.basicperson.interfaces import IBasicPerson
 from schooltool.contact.interfaces import IContactable
 from schooltool.group.interfaces import IGroupContainer
+from schooltool.group.interfaces import IGroup
 from schooltool.person.interfaces import IPerson, IPersonFactory
 from schooltool.person.browser.person import PersonTable, PersonTableFormatter
 from schooltool.person.browser.person import PersonTableFilter
@@ -74,6 +80,7 @@ from schooltool.schoolyear.interfaces import ISchoolYearContainer
 from schooltool.relationship.temporal import ACTIVE
 from schooltool.report.report import OldReportTask
 from schooltool.report.browser.report import RequestRemoteReportDialog
+from schooltool.schoolyear.interfaces import ISchoolYear
 from schooltool.skin.containers import TableContainerView
 from schooltool.skin import flourish
 from schooltool.skin.flourish.interfaces import IViewletManager
@@ -88,9 +95,9 @@ from schooltool.task.tasks import getLastMessagesReadTime
 from schooltool.task.tasks import markMessagesRead
 from schooltool.task.browser.task import MessageColumn
 from schooltool.term.interfaces import IDateManager
+from schooltool.term.interfaces import ITerm
 
 from schooltool.common import SchoolToolMessage as _
-
 
 
 class BasicPersonContainerView(TableContainerView):
@@ -325,13 +332,13 @@ class FlourishPersonView(flourish.page.Page):
 
     @property
     def subtitle(self):
-        result = []
-        levels = self.context.levels
-        for level in levels.on(self.request.util.today).any(ACTIVE):
-            result.append(level)
-        if result:
-            level = ', '.join([level.title for level in levels])
-            return '(%s)' % level
+        if is_student(self.context):
+            result = []
+            levels = self.context.levels
+            for level in levels.on(self.request.util.today).any(ACTIVE):
+                result.append(level)
+            if result:
+                return ', '.join([level.title for level in result])
 
 
 class FlourishPersonInfo(flourish.page.Content):
@@ -1692,3 +1699,173 @@ class StatusPersonListTable(PersonListTable):
         app = ISchoolToolApplication(None)
         container = IRelationshipStateContainer(app)
         return container.get(self.app_states_name, None)
+
+
+class LeaveSchoolView(flourish.form.Form,
+                      form.EditForm):
+
+    template = InheritTemplate(flourish.page.Page.template)
+    label = None
+    legend = _('Un-enroll Information')
+
+    @property
+    def fields(self):
+        field_descriptions = IDemographicsFields(ISchoolToolApplication(None))
+        fields = field.Fields()
+        for name in LEAVE_SCHOOL_FIELDS:
+            if name in field_descriptions:
+                fields += field_descriptions[name].makeField()
+        return fields
+
+    @property
+    def title(self):
+        return self.context.title
+
+    def update(self):
+        form.EditForm.update(self)
+
+    def updateActions(self):
+        super(LeaveSchoolView, self).updateActions()
+        self.actions['apply'].addClass('button-ok')
+        self.actions['cancel'].addClass('button-cancel')
+
+    def updateWidgets(self, *args, **kw):
+        super(LeaveSchoolView, self).updateWidgets(*args, **kw)
+        self.widgets['leave_date'].value = self.request.util.today
+
+    @button.buttonAndHandler(_('Submit'), name='apply')
+    def handleApply(self, action):
+        super(LeaveSchoolView, self).handleApply.func(self, action)
+        if (self.status == self.successMessage or
+            self.status == self.noChangesMessage):
+            data, errors = self.extractData()
+            person = removeSecurityProxy(self.context)
+            leave_date = data['leave_date']
+            relationships = Membership.bind(member=person).all().relationships
+            for link_info in relationships:
+                target = removeSecurityProxy(link_info.target)
+                if ISection.providedBy(target):
+                    term = ITerm(target)
+                    if leave_date in term or leave_date < term.first:
+                        collection = removeSecurityProxy(target.members)
+                        if leave_date < term.first:
+                            link_info.state.replace({})
+                        collection.on(leave_date).relate(person, INACTIVE, 'i')
+                else:
+                    schoolyear = ISchoolYear(target.__parent__)
+                    if ((schoolyear.first <= leave_date <= schoolyear.last) or
+                        leave_date < schoolyear.first):
+                        collection = removeSecurityProxy(target.members)
+                        code = 'w' if target.__name__ == 'students' else 'r'
+                        if leave_date < schoolyear.first:
+                            link_info.state.replace({})
+                        collection.on(leave_date).relate(person, INACTIVE, code)
+            self.request.response.redirect(self.nextURL())
+
+    @button.buttonAndHandler(_("Cancel"))
+    def handle_cancel_action(self, action):
+        self.request.response.redirect(self.nextURL())
+
+    def nextURL(self):
+        return absoluteURL(self.context, self.request)
+
+
+class LeaveSchoolLinkViewlet(flourish.page.LinkViewlet):
+
+    @property
+    def enabled(self):
+        return is_student(self.context)
+
+
+class LevelAccordionViewlet(Viewlet):
+
+    template = ViewPageTemplateFile('templates/f_levelViewlet.pt')
+
+    @property
+    def title(self):
+        result = _('Grade Level')
+        today = self.request.util.today
+        levels = [level.title
+                  for level in self.context.levels.on(today).any(ACTIVE)]
+        if levels:
+            result = _('Grade Level: ${level}',
+                       mapping={'level': ', '.join(levels)})
+        return result
+
+    @property
+    def canModify(self):
+        return canAccess(self.context.__parent__, '__delitem__')
+
+    def render(self, *args, **kw):
+        if is_student(self.context):
+            return self.template(*args, **kw)
+        return ''
+
+
+class PersonEditLevelView(flourish.form.Form,
+                          form.EditForm):
+
+    template = InheritTemplate(flourish.page.Page.template)
+    label = None
+    legend = _('Level Information')
+
+    @property
+    def fields(self):
+        result = field.Fields(Date(__name__='date', title=_('Date')))
+        result += field.Fields(ILevelField)
+        return result
+
+    @property
+    def current_level(self):
+        today = self.request.util.today
+        levels = [level
+                  for level in self.context.levels.on(today).any(ACTIVE)]
+        if levels:
+            return levels[0]
+
+    def getContent(self):
+        return {
+            'date': self.request.util.today,
+            'level': self.current_level,
+        }
+
+    @property
+    def title(self):
+        return self.context.title
+
+    def update(self):
+        form.EditForm.update(self)
+
+    def updateActions(self):
+        super(PersonEditLevelView, self).updateActions()
+        self.actions['apply'].addClass('button-ok')
+        self.actions['cancel'].addClass('button-cancel')
+
+    def updateWidgets(self, *args, **kw):
+        super(PersonEditLevelView, self).updateWidgets(*args, **kw)
+        self.widgets['level'].prompt = True
+        self.widgets['level'].promptMessage = _('No Level')
+
+    @button.buttonAndHandler(_('Submit'), name='apply')
+    def handleApply(self, action):
+        super(PersonEditLevelView, self).handleApply.func(self, action)
+        if (self.status == self.successMessage or
+            self.status == self.noChangesMessage):
+            data, errors = self.extractData()
+            person = removeSecurityProxy(self.context)
+            date = data['date']
+            current_level = removeSecurityProxy(self.current_level)
+            new_level = removeSecurityProxy(data['level'])
+            if current_level != new_level:
+                if current_level is not None:
+                    person.levels.on(date).relate(current_level, INACTIVE, 'i')
+                if new_level is not None:
+                    person.levels.on(date).relate(new_level)
+        self.request.response.redirect(self.nextURL())
+
+    @button.buttonAndHandler(_("Cancel"))
+    def handle_cancel_action(self, action):
+        self.request.response.redirect(self.nextURL())
+
+    def nextURL(self):
+        return absoluteURL(self.context, self.request)

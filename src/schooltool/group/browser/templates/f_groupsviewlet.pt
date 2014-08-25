@@ -16,15 +16,22 @@
       <ul>
         <li tal:repeat="schoolyear view/schoolyears" class="year">
           <a tal:attributes="href schoolyear/obj/@@absolute_url;
-                             title schoolyear/obj/title"
+                             title schoolyear/obj/title;
+                             class schoolyear/css_class;"
              tal:content="schoolyear/obj/title"></a>
           <ul>
-            <li tal:repeat="group schoolyear/groups" class="group">
+            <li tal:repeat="group_data schoolyear/groups" class="group">
               <a tal:attributes="href
-                                 string:${group/@@absolute_url}?done_link=${request/URL};
-                               title group/title"
-                 tal:content="group/title"
+                                 string:${group_data/obj/@@absolute_url}?done_link=${request/URL};
+                               title group_data/title"
+                 tal:content="group_data/title"
                  class="leaf_url"></a>
+              <ul>
+                <li tal:repeat="state group_data/states">
+                  <tal:block replace="state/title" />
+                  (<tal:block replace="state/date/@@mediumDate" />)
+                </li>
+              </ul>
             </li>
           </ul>
         </li>

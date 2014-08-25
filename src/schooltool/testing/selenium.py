@@ -1663,3 +1663,15 @@ def remove_temporal_relationship(browser, items, state=None, date=None):
 
     set_temporal_relationship(
         browser, container_id, action_button, items, state, date)
+
+
+def print_tree(ul, padding=0):
+    for li in ul.query_all.xpath('li'):
+        uls = li.query_all.xpath('ul')
+        if uls:
+            for link in li.query_all.xpath('a'):
+                print ' '*padding, '|+', link.text
+            for ul in uls:
+                print_tree(ul, padding+3)
+        else:
+            print ' '*padding, '|-', li.text

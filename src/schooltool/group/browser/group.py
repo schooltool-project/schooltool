@@ -46,6 +46,7 @@ from zope.security.interfaces import Unauthorized
 
 from schooltool.app.browser.app import ActiveSchoolYearContentMixin
 from schooltool.app.interfaces import ISchoolToolApplication
+from schooltool.app.interfaces import IRelationshipStateContainer
 from schooltool.skin.containers import TableContainerView
 from schooltool.app.browser.app import BaseAddView, BaseEditView
 from schooltool.app.browser.app import ContentTitle
@@ -53,6 +54,7 @@ from schooltool.app.browser.states import EditTemporalRelationships
 from schooltool.app.browser.states import TemporalRelationshipAddTableMixin
 from schooltool.app.browser.states import TemporalRelationshipRemoveTableMixin
 from schooltool.app.browser.app import RelationshipViewBase
+from schooltool.app.membership import Membership
 from schooltool.person.interfaces import IPerson
 from schooltool.person.interfaces import IPersonFactory
 from schooltool.person.browser.person import PersonTableFilter
@@ -211,32 +213,61 @@ class GroupsViewlet(ViewletBase):
         return canAccess(self.context.__parent__, '__delitem__')
 
 
-class FlourishGroupsViewlet(Viewlet):
+class FlourishGroupsViewlet(Viewlet, ActiveSchoolYearContentMixin):
     """A flourish viewlet showing the groups a person is in."""
 
     template = ViewPageTemplateFile('templates/f_groupsviewlet.pt')
     render = lambda self, *a, **kw: self.template(*a, **kw)
 
+    def app_states(self, key):
+        app = ISchoolToolApplication(None)
+        states = IRelationshipStateContainer(app)[key]
+        return states
+
+    def group_current_states(self, link_info, app_states):
+        states = []
+        for date, active, code in link_info.state.all():
+            state = app_states.states.get(code)
+            title = state.title if state is not None else ''
+            states.append({
+                'date': date,
+                'title': title,
+                })
+        return states
+
     def update(self):
         self.collator = ICollator(self.request.locale)
-        groups = [
-            group for group in self.context.groups
-            if (canAccess(group, 'title') and
-                not ISection.providedBy(group))]
-
+        relationships = Membership.bind(member=self.context).all().relationships
+        group_states = self.app_states('group-membership')
+        student_states = self.app_states('student-enrollment')
         schoolyears_data = {}
-        for group in groups:
+        for link_info in relationships:
+            group = removeSecurityProxy(link_info.target)
+            if ISection.providedBy(group) or not canAccess(group, 'title'):
+                continue
             sy = ISchoolYear(group.__parent__)
             if sy not in schoolyears_data:
                 schoolyears_data[sy] = []
-            schoolyears_data[sy].append(group)
-
+            schoolyears_data[sy].append((group, link_info))
         self.schoolyears = []
         for sy in sorted(schoolyears_data, key=lambda x:x.first, reverse=True):
-            sy_info = {'obj': sy,
-                       'groups': sorted(schoolyears_data[sy],
-                                        cmp=self.collator.cmp,
-                                        key=lambda x:x.title)}
+            sy_info = {
+                'obj': sy,
+                'css_class': 'active' if sy is self.schoolyear else 'inactive',
+                'groups': [],
+                }
+            for group, link_info in sorted(schoolyears_data[sy],
+                                           key=lambda x:self.collator.key(
+                                               x[0].title)):
+                is_students = group.__name__ == 'students'
+                app_states = student_states if is_students else group_states
+                states = self.group_current_states(link_info, app_states)
+                group_info = {
+                    'obj': group,
+                    'title': group.title,
+                    'states': states,
+                    }
+                sy_info['groups'].append(group_info)
             self.schoolyears.append(sy_info)
 
     @property

@@ -200,9 +200,13 @@ class ReportsLinks(RefineLinksViewlet):
                                       context=self.request)
                 description = translate(viewlet.description,
                                         context=self.request)
-                querystring = urlencode({
-                        'file_type': file_type.encode('utf-8').upper(),
-                        'description': description.encode('utf-8')})
+                params = {
+                    'file_type': file_type.encode('utf-8').upper(),
+                    'description': description.encode('utf-8'),
+                }
+                viewlet_params = getattr(viewlet, 'extra_params', {})
+                params.update(viewlet_params)
+                querystring = urlencode(params)
                 url = '%s?%s' % (viewlet.report_link, querystring)
             result.append({
                     'class': item['class'],
