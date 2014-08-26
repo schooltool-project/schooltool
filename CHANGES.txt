@@ -2,9 +2,15 @@
 CHANGES
 =======
 
-2.8.1 (unreleased)
+2.8.1 (2014-08-25)
 ------------------
 
+- Added un-enroll functionality for students
+- Added accordion and edit view for student level
+- Added custom CSS handling
+- Fixed row indexing in group importer after relationship change
+- Added relationship states to group accordion in person view
+- Fixed permissions for school year report links and manage year link
 - Fixed page numbers in pdf reports
 - Avoid insecure content warning for fonts.googleapis.com when accessing
   schooltool through https (https://launchpad.net/bugs/1330106)
