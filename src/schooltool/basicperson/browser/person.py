@@ -1220,6 +1220,9 @@ class FlourishManagePeopleOverview(flourish.page.Content,
     def persons_url(self):
         return self.url_with_schoolyear_id(self.context, view_name='persons')
 
+    def group_members(self, group):
+        return len(group.members.all().any(ACTIVE))
+
 
 class FlourishRequestPersonIDCardView(RequestRemoteReportDialog):
 
