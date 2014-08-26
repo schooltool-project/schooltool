@@ -191,7 +191,7 @@ def evolveSectionsRelationships(app):
     containers = app['schooltool.course.section']
     for term_id, container in list(containers.items()):
         term = int_ids.queryObject(int(term_id))
-        if not term:
+        if term is None:
             del containers[term_id]
             continue
         for section in container.values():
@@ -208,19 +208,19 @@ def evolveSectionsRelationships(app):
 def evolveGroupRelationships(app):
     int_ids = getUtility(IIntIds)
     containers = app['schooltool.group']
-    for term_id, container in list(containers.items()):
-        term = int_ids.queryObject(int(term_id))
-        if not term:
-            del containers[term_id]
+    for year_id, container in list(containers.items()):
+        year = int_ids.queryObject(int(year_id))
+        if year is None:
+            del containers[year_id]
             continue
         for group in container.values():
             members = group.members
             evolveRelationships(
-                term.first, group, members.rel_type, members.other_role,
+                year.first, group, members.rel_type, members.other_role,
                 Membership.rel_type)
             leaders = group.leaders
             evolveRelationships(
-                term.first, group, leaders.rel_type, leaders.other_role,
+                year.first, group, leaders.rel_type, leaders.other_role,
                 Leadership.rel_type)
 
 
@@ -229,7 +229,7 @@ def evolveCourseRelationships(app):
     containers = app['schooltool.course.course']
     for year_id, container in list(containers.items()):
         year = int_ids.queryObject(int(year_id))
-        if not year:
+        if year is None:
             del containers[year_id]
             continue
         for course in container.values():
