@@ -293,14 +293,15 @@ class PersonInstructorsCrowd(Crowd):
     title = _(u'Instructors')
     description = _(u'Instructors of a person in any of his sections.')
 
-    def _getSections(self, ob):
-        return [section for section in getRelatedObjects(ob, membership.URIGroup)
-                if interfaces.ISection.providedBy(section)]
-
     def contains(self, principal):
         user = IPerson(principal, None)
         person = IPerson(self.context)
-        for section in self._getSections(person):
+        group_relation = membership.Membership
+        relationships = group_relation.bind(member=person).all().relationships
+        for link_info in relationships:
+            section = removeSecurityProxy(link_info.target)
+            if not interfaces.ISection.providedBy(section):
+                continue
             if user in section.instructors:
                 return True
         return False
