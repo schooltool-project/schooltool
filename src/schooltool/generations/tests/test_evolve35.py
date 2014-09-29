@@ -35,6 +35,8 @@ from zope.catalog.interfaces import ICatalog
 
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.generations.tests import ContextStub
+from schooltool.generations.tests import setUp
+from schooltool.generations.tests import tearDown
 from schooltool.generations.evolve35 import CATALOG_KEYS
 
 
@@ -54,22 +56,12 @@ class UtilityStub(Folder):
         return '<%s (%s)>' % (self.__class__.__name__, self.name)
 
 
-class AppStub(Folder):
-    implements(ISchoolToolApplication)
-
-
 def doctest_evolve35():
     """Test evolution to generation 35.
 
-    We'll need int ids.
-
-        >>> provideUtility(IntIds(), IIntIds)
-
     First, let's build ST app with local catalog utilities.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
-        >>> app.setSiteManager(LocalSiteManager(app))
+        >>> context = ContextStub(app)
 
         >>> for name in CATALOG_KEYS:
         ...     registerLocalUtility(app, UtilityStub(name), name)
@@ -105,15 +97,6 @@ def doctest_evolve35():
         None
 
     """
-
-
-def setUp(test):
-    setup.placefulSetUp()
-    setup.setUpTraversal()
-
-
-def tearDown(test):
-    setup.placefulTearDown()
 
 
 def test_suite():

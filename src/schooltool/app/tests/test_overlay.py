@@ -22,11 +22,14 @@ Unit tests for schooltool.app.overlay.
 import unittest
 import doctest
 
+from schooltool.app.tests import setUp, tearDown
+
 
 def test_suite():
     return unittest.TestSuite([
                 doctest.DocTestSuite('schooltool.app.overlay',
-                                     optionflags=doctest.ELLIPSIS),
+                                     setUp=setUp, tearDown=tearDown,
+                                     optionflags=doctest.ELLIPSIS|doctest.REPORT_ONLY_FIRST_FAILURE),
            ])
 
 

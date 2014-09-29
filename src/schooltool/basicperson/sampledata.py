@@ -73,8 +73,8 @@ class SampleStudents(object):
             person = self.personFactory(namegen, prefixgen, gendergen, count)
             # Without removeSecurityProxy we can't add members a
             # group.
+            app['persons'][person.username] = person
             removeSecurityProxy(students.members).add(person)
-            app['persons'][person.__name__] = person
 
 
 class SampleTeachers(object):
@@ -100,8 +100,8 @@ class SampleTeachers(object):
             person = self.personFactory(namegen, count)
             # Without removeSecurityProxy we can't add members a
             # group.
+            app['persons'][person.username] = person
             removeSecurityProxy(teachers.members).add(person)
-            app['persons'][person.__name__] = person
 
 
 class SamplePersonalEvents(object):

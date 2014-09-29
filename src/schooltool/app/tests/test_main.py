@@ -470,9 +470,6 @@ def doctest_restoreManagerUser():
 
         >>> from schooltool.app.main import SchoolToolServer
         >>> server = SchoolToolServer()
-        >>> options = OptionsStub()
-        >>> options.config.site_definition = ftesting_zcml
-        >>> server.configureComponents(options)
 
     We also need an application (we are doing the full set up in here
     because else person factory local utility is not being
@@ -485,19 +482,24 @@ def doctest_restoreManagerUser():
         >>> from zope.app.publication.zopepublication import ZopePublication
         >>> from ZODB.DB import DB
         >>> from ZODB.MappingStorage import MappingStorage
+        >>> from schooltool.app.interfaces import CatalogStartUpEvent
+        >>> from schooltool.testing.setup import getIntegrationTestZCML
+        >>> from schooltool.testing.stubs import AppStub
 
-        >>> db = DB(MappingStorage())
-        >>> connection = db.open()
-        >>> root = connection.root()
+        >>> zcml = getIntegrationTestZCML()
+        >>> zcml.string('''
+        ... <utility factory="schooltool.basicperson.person.PersonFactoryUtility" />
+        ... ''')
+        >>> app = AppStub()
+        >>> from schooltool.person.person import PersonContainer
+        >>> app['persons'] = PersonContainer()
 
         >>> from schooltool.app.app import SchoolToolApplication
-        >>> app = SchoolToolApplication()
-        >>> directlyProvides(app, IContainmentRoot)
-        >>> root[ZopePublication.root_name] = app
-
-        >>> save_point = transaction.savepoint(optimistic=True)
-        >>> notify(ApplicationInitializationEvent(app))
-        >>> notify(ObjectAddedEvent(app))
+        >>> from schooltool.relationship.catalog import getLinkCatalog
+        >>> from zope.site.hooks import setSite
+        >>> from zope.component import provideUtility
+        >>> from zope.intid.interfaces import IIntIds
+        >>> from zope.intid import IntIds
 
     Initially, there's no manager user in the database:
 
@@ -551,7 +553,6 @@ def doctest_restoreManagerUser():
     Cleanup:
 
         >>> transaction.abort()
-        >>> connection.close()
         >>> cleanup.tearDown()
     """
 
@@ -714,10 +715,10 @@ def test_suite():
     schooltool.app.main._ = lambda x: x
 
     optionflags = (doctest.ELLIPSIS |
-                   doctest.NORMALIZE_WHITESPACE |
+                   doctest.NORMALIZE_WHITESPACE | doctest.REPORT_ONLY_FIRST_FAILURE |
                    doctest.REPORT_NDIFF)
     return unittest.TestSuite([
-                doctest.DocTestSuite(optionflags=doctest.ELLIPSIS),
+                doctest.DocTestSuite(optionflags=optionflags),
                 doctest.DocTestSuite('schooltool.app.main',
                                      optionflags=optionflags),
            ])

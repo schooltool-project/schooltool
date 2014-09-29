@@ -13,5 +13,14 @@
      for="schooltool.term.interfaces.IDateManager"
      class="schooltool.resource.browser.stests.test_selenium.DateManagementView"
      permission="schooltool.view" />
+  <configure package="schooltool.export">
+    <flourish:page
+        name="import.html"
+        subtitle="Import Data"
+        for="schooltool.app.interfaces.ISchoolToolApplication"
+        content_template="templates/f_import.pt"
+        class=".importer.FlourishMegaImporter"
+        permission="schooltool.edit" />
+  </configure>
 
 </configure>

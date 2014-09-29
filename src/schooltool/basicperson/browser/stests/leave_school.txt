@@ -35,13 +35,13 @@ leaving, Reason for leaving and Destination school:
     Language
     Place of birth
     Citizenship
-    Date of leaving
-    Reason for leaving
+    Date of un-enrollment
+    Reason for un-enrollment
     Destination school
 
 The enum fields are empty, let's add some values to them:
 
-    >>> manager.query.link('Reason for leaving').click()
+    >>> manager.query.link('Reason for un-enrollment').click()
     >>> reasons = '\n'.join([
     ...     'A reason',
     ...     'Another reason',
@@ -72,8 +72,8 @@ These fields cannot be deleted:
     Language, True
     Place of birth, True
     Citizenship, True
-    Date of leaving, False
-    Reason for leaving, False
+    Date of un-enrollment, False
+    Reason for un-enrollment, False
     Destination school, False
 
 Set up a school year:
@@ -161,7 +161,7 @@ Let's look at Camila's sections and groups:
 
 Make Camila leave the school today:
 
-    >>> manager.query.link('Leave School').click()
+    >>> manager.query.link('Un-enroll').click()
     >>> print manager.query.id('form-widgets-leave_date').get_attribute('value')
     2014-08-09
     >>> manager.query.id('form-widgets-leave_reason').ui.set_value('Last reason')
@@ -175,8 +175,8 @@ The leave information has been saved:
     First name: Camila
     Last name: Cerna
     Username: camila
-    Date of leaving: 2014-08-09
-    Reason for leaving: Last reason
+    Date of un-enrollment: 2014-08-09
+    Reason for un-enrollment: Last reason
     Destination school: Another school
 
 and she has been removed from her sections and groups:

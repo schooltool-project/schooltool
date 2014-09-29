@@ -885,7 +885,9 @@ class Downloads(object):
             return
         for name in os.listdir(self.path):
             # unfinished download
-            if name.endswith('.crdownload') or name.endswith('.part'):
+            if (name.endswith('.crdownload') or
+                name.endswith('.part') or
+                name.startswith('.com.google.Chrome')):
                 continue
             # empty file
             if not self._size(name):
@@ -1667,8 +1669,9 @@ def remove_temporal_relationship(browser, items, state=None, date=None):
 
 def print_tree(ul, padding=0):
     for li in ul.query_all.xpath('li'):
-        uls = li.query_all.xpath('ul')
+        uls = ul.browser.driver.execute_script('return $(arguments[0]).find("ul")', li)
         if uls:
+            uls = li.query_all.xpath('ul')
             for link in li.query_all.xpath('a'):
                 print ' '*padding, '|+', link.text
             for ul in uls:

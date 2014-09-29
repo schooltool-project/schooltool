@@ -33,6 +33,7 @@ from z3c.form import field
 
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.contact.basicperson import IBoundContact
+from schooltool.contact.contact import getAppContactStates
 from schooltool.contact.interfaces import IContactInformation
 from schooltool.contact.interfaces import IContact
 from schooltool.contact.interfaces import IContactable
@@ -69,26 +70,41 @@ class ContactOverviewView(BrowserView):
                 parts.append(part)
         return parts
 
-    def buildInfo(self, contact):
+    @property
+    def app_states(self):
+        return getAppContactStates()
+
+    def contactInfo(self, contact_context, title):
+        contact = IContact(contact_context)
         return {
-            'link': absoluteURL(contact, self.request),
-            'relationship': get_relationship_title(self.person, contact),
-            'name': " ".join(self._extract_attrs(
-                contact, IContactPerson)),
+            'link': absoluteURL(contact_context, self.request),
+            'relationship': title,
+            'name': " ".join(self._extract_attrs(contact, IContactPerson)),
             'address': ", ".join(self._extract_attrs(contact, IAddress)),
             'emails': ", ".join(self._extract_attrs(contact, IEmails)),
-            'phones': list(self._extract_attrs(contact, IPhones, add_title=True)),
+            'phones': list(self._extract_attrs(contact, IPhones,
+                                               add_title=True)),
             'languages': ", ".join(self._extract_attrs(contact, ILanguages)),
+            '__parent__': contact_context,
             }
+
+    def buildInfo(self, contact):
+        contact = IContact(contact)
+        title = get_relationship_title(self.person, contact)
+        return self.contactInfo(contact, title)
+
+    def buildPersonInfo(self, info):
+        contact = info.target
+        title = self.app_states.getTitle(info.state.today) or u''
+        return self.contactInfo(contact, title)
 
     def getContacts(self):
         contacts = IContactable(removeSecurityProxy(self.person)).contacts
         return [self.buildInfo(contact) for contact in contacts]
 
     def getRelationships(self):
-        bound = IContactable(self.person)
-        contacts = bound.contacts
-        return [self.buildInfo(contact) for contact in contacts]
+        return [self.buildPersonInfo(info)
+                for info in self.context.persons.any().relationships]
 
     def getPerson(self):
         bound = IContact(self.person)

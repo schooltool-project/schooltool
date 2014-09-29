@@ -25,6 +25,8 @@ import doctest
 from zope.interface import implements
 from zope.component import provideAdapter
 
+from schooltool.app.tests import setUp, tearDown
+
 
 def doctest_Instruction():
     r"""Tests for Instruction URIs and methods
@@ -71,7 +73,6 @@ def doctest_CourseSections():
     Relationship tests require some setup:
 
         >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> setUp()
         >>> import zope.event
         >>> old_subscribers = zope.event.subscribers[:]
         >>> zope.event.subscribers.append(enforceCourseSectionConstraint)
@@ -81,11 +82,11 @@ def doctest_CourseSections():
         >>> from schooltool.course.course import Course
         >>> from schooltool.course.section import Section
         >>> from schooltool.person.person import Person
-        >>> history = Course()
-        >>> section1 = Section(title = "section1")
-        >>> section2 = Section(title = "section2")
-        >>> section3 = Section(title = "section3")
-        >>> section4 = Section(title = "section4")
+        >>> history = courses['history'] = Course()
+        >>> section1 = sections['1'] = Section(title = "section1")
+        >>> section2 = sections['2'] = Section(title = "section2")
+        >>> section3 = sections['3'] = Section(title = "section3")
+        >>> section4 = sections['4'] = Section(title = "section4")
         >>> person = Person()
 
     Our course doesn't have any sections yet:
@@ -148,10 +149,12 @@ def getSectionCalendar(section):
 
 
 from zope.annotation.interfaces import IAttributeAnnotatable
-class CalendarStub(object):
+from persistent import Persistent
+class CalendarStub(Persistent):
     implements(IAttributeAnnotatable)
     def __init__(self, section):
         self.title = section.title
+        self.__parent__ = section
 
 
 def doctest_updateInstructorCalendars():
@@ -168,7 +171,6 @@ def doctest_updateInstructorCalendars():
         >>> from schooltool.person.person import Person
         >>> from schooltool.course.section import Section
         >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> setUp()
 
         >>> provideAdapter(getSectionCalendar,
         ...                adapts=(ISection,),
@@ -187,10 +189,10 @@ def doctest_updateInstructorCalendars():
         >>> class OtherEventStub(dict):
         ...     rel_type = URIInstruction
 
-        >>> person = Person()
+        >>> person = persons['person'] = Person('person')
         >>> [cal.calendar.title for cal in person.overlaid_calendars]
         []
-        >>> section = Section(title="SectionA")
+        >>> section = sections['sectionA'] = Section(title="SectionA")
         >>> section.calendar = CalendarStub(section)
 
     When the person is made the instructor of a section the sections calendar
@@ -219,7 +221,7 @@ def doctest_updateInstructorCalendars():
 
     If a person allready has that calendar nothing changes:
 
-        >>> sectionb = Section(title="SectionB")
+        >>> sectionb = sections['sectionB'] = Section(title="SectionB")
         >>> sectionb.calendar = CalendarStub(sectionb)
         >>> person.overlaid_calendars.add(sectionb.calendar)
         <...CalendarOverlayInfo object at ...>
@@ -275,7 +277,6 @@ def doctest_updateStudentCalendars():
         >>> from schooltool.course.section import Section
         >>> from schooltool.person.person import Person
         >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> setUp()
 
         >>> from schooltool.course.interfaces import ISection
         >>> from schooltool.app.interfaces import ISchoolToolCalendar
@@ -296,10 +297,10 @@ def doctest_updateStudentCalendars():
         >>> class OtherEventStub(dict):
         ...     rel_type = URIMembership
 
-        >>> person = Person('p')
+        >>> person = persons['p'] = Person('p')
         >>> [cal.calendar.title for cal in person.overlaid_calendars]
         []
-        >>> section = Section(title="SectionA")
+        >>> section = sections['a'] = Section(title="SectionA")
         >>> section.calendar = CalendarStub(section)
 
     When the person is made a member of a section the sections calendar
@@ -328,7 +329,7 @@ def doctest_updateStudentCalendars():
 
     If a person already has that calendar nothing changes:
 
-        >>> sectionb = Section(title="SectionB")
+        >>> sectionb = sections['b'] = Section(title="SectionB")
         >>> sectionb.calendar = CalendarStub(sectionb)
         >>> person.overlaid_calendars.add(sectionb.calendar)
         <...CalendarOverlayInfo object at ...>
@@ -382,12 +383,12 @@ def doctest_updateStudentCalendars():
     You can add a group to a section and it's members overlay list will be
     updated:
 
-        >>> student = Person('p3')
+        >>> student = persons['p3'] = Person('p3')
         >>> [cal.calendar.title for cal in person.overlaid_calendars]
         []
-        >>> freshmen = Group()
+        >>> freshmen = groups['freshmen'] = Group()
         >>> freshmen.members.add(student)
-        >>> section = Section("Freshmen Math")
+        >>> section = sections['math'] = Section("Freshmen Math")
         >>> section.calendar = CalendarStub(section)
         >>> add = AddEventStub()
         >>> add[URIMember] = freshmen
@@ -413,7 +414,8 @@ def doctest_updateStudentCalendars():
 
 def test_suite():
     return unittest.TestSuite([
-                doctest.DocTestSuite(optionflags=doctest.ELLIPSIS),
+                doctest.DocTestSuite(setUp=setUp, tearDown=tearDown,
+                                     optionflags=doctest.ELLIPSIS),
                 doctest.DocTestSuite('schooltool.app.relationships',
                                      optionflags=doctest.ELLIPSIS),
            ])

@@ -27,6 +27,9 @@ from zope.container.btree import BTreeContainer
 
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.email.interfaces import IEmailContainer
+from schooltool.generations.tests import ContextStub
+from schooltool.generations.tests import setUp
+from schooltool.generations.tests import tearDown
 
 
 class AppStub(BTreeContainer):
@@ -44,8 +47,7 @@ def doctest_evolve34():
 
     Set some apps:
 
-        >>> from schooltool.generations.tests import ContextStub
-        >>> context = ContextStub()
+        >>> context = ContextStub(app)
         >>> context.root_folder['app1'] = app1 = AppStub()
         >>> context.root_folder['app2'] = app2 = AppStub()
         >>> context.root_folder['app3'] = app3 = AppStub()
@@ -98,14 +100,6 @@ def doctest_evolve34():
         True
 
     """
-
-
-def setUp(test):
-    setup.placelessSetUp()
-
-
-def tearDown(test):
-    setup.placelessTearDown()
 
 
 def test_suite():

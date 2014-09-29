@@ -20,9 +20,11 @@
 
 import unittest
 import doctest
+from transaction import abort
 
 from zope.app.testing import setup
 from zope.component import provideAdapter
+from zope.container.btree import BTreeContainer
 from zope.interface import Interface
 from zope.interface.verify import verifyObject
 
@@ -30,6 +32,7 @@ from schooltool.group.interfaces import IGroupContainer
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.app.interfaces import ISchoolToolCalendar
 from schooltool.testing import setup as stsetup
+from schooltool.testing.stubs import AppStub
 
 
 def doctest_SampleStudents():
@@ -46,8 +49,6 @@ def doctest_SampleStudents():
 
         >>> plugin.power
         1000
-
-        >>> app = stsetup.setUpSchoolToolSite()
 
         >>> students = IGroupContainer(app)['students']
 
@@ -93,8 +94,6 @@ def doctest_SampleTeachers():
     This plugin creates a number of teachers and adds them to the
     Teachers group.
 
-        >>> app = stsetup.setUpSchoolToolSite()
-
         >>> teachers = IGroupContainer(app)['teachers']
 
         >>> len(teachers.members)
@@ -132,8 +131,6 @@ def doctest_SamplePersonalEvents():
         >>> plugin = SamplePersonalEvents()
         >>> verifyObject(ISampleDataPlugin, plugin)
         True
-
-        >>> app = stsetup.setUpSchoolToolSite()
 
         >>> from schooltool.basicperson.sampledata import SampleStudents
         >>> from schooltool.basicperson.sampledata import SampleTeachers
@@ -189,6 +186,11 @@ def doctest_SamplePersonalEvents():
 
 def setUp(test):
     setup.placefulSetUp()
+    zcml = stsetup.getIntegrationTestZCML()
+    zcml.include('schooltool.schoolyear', file='schoolyear.zcml')
+    app = AppStub()
+    app['persons'] = BTreeContainer()
+
     from schooltool.term.term import getTermContainer
     from schooltool.term.interfaces import ITermContainer
     from schooltool.schoolyear.schoolyear import getSchoolYearContainer
@@ -196,7 +198,7 @@ def setUp(test):
     provideAdapter(getSchoolYearContainer)
 
     from schooltool.group.group import GroupContainer, Group
-    groups = GroupContainer()
+    groups = app['groups'] = GroupContainer()
     provideAdapter(lambda context: groups,
                    adapts=[ISchoolToolApplication],
                    provides=IGroupContainer)
@@ -212,10 +214,14 @@ def setUp(test):
     from schooltool.app.interfaces import ISchoolToolCalendar
     from schooltool.person.interfaces import IPerson
     provideAdapter(getCalendar, [IPerson], ISchoolToolCalendar)
+    test.globs.update({
+        'app': app,
+    })
 
 
 def tearDown(test):
     setup.placefulTearDown()
+    abort()
 
 
 def test_suite():

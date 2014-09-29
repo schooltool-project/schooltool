@@ -20,6 +20,7 @@ Unit tests for basic person views.
 """
 import unittest
 import doctest
+from transaction import abort
 
 from z3c.form.testing import TestRequest
 from zope.app.testing import setup
@@ -33,6 +34,8 @@ from zope.traversing.interfaces import IContainmentRoot
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.group.interfaces import IGroupContainer
 from schooltool.relationship.tests import setUpRelationships
+from schooltool.testing.setup import getIntegrationTestZCML
+from schooltool.testing.stubs import AppStub
 
 
 def doctest_PersonContainerView():
@@ -45,7 +48,7 @@ def doctest_PersonContainerView():
         >>> from schooltool.person.person import Person, PersonContainer
         >>> setup.setUpAnnotations()
 
-        >>> personContainer = PersonContainer()
+        >>> personContainer = app['persons'] = PersonContainer()
         >>> directlyProvides(personContainer, IContainmentRoot)
 
         >>> personContainer['pete'] = Person('pete', 'Pete Parrot')
@@ -116,10 +119,6 @@ def doctest_PersonAddFormAdapter():
     """
 
 
-class AppStub(dict):
-    implements(ISchoolToolApplication)
-
-
 def doctest_PersonAddView():
     r"""Test for PersonAddView
 
@@ -150,12 +149,12 @@ def doctest_PersonAddView():
     Let's create a PersonContainer
 
         >>> from schooltool.person.person import PersonContainer
-        >>> pc = PersonContainer()
+        >>> pc = app['persons'] = PersonContainer()
 
     And a group container:
 
         >>> from schooltool.group.group import GroupContainer
-        >>> gc = GroupContainer()
+        >>> gc = app['groups'] = GroupContainer()
         >>> provideAdapter(lambda context: gc,
         ...                adapts=[ISchoolToolApplication],
         ...                provides=IGroupContainer)
@@ -368,22 +367,31 @@ def doctest_GroupTerm():
 
 
 def setUp(test):
-    setup.placelessSetUp()
+    setup.placefulSetUp()
     from z3c.form import testing
     testing.setupFormDefaults()
-    vr = getVocabularyRegistry()
-    from schooltool.basicperson.vocabularies import groupVocabularyFactory
-    from schooltool.basicperson.vocabularies import advisorVocabularyFactory
-    vr.register('schooltool.basicperson.group_vocabulary',
-                groupVocabularyFactory())
-    vr.register('schooltool.basicperson.advisor_vocabulary',
-                advisorVocabularyFactory())
-    setUpRelationships()
-    setUpAnnotations()
+    from zope.app.schema import vocabulary
+    vocabulary._clear()
+    zcml = getIntegrationTestZCML()
+    zcml.string('''
+    <utility
+        factory="schooltool.basicperson.vocabularies.groupVocabularyFactory"
+        provides="zope.schema.interfaces.IVocabularyFactory"
+        name="schooltool.basicperson.group_vocabulary" />
+    <utility
+        factory="schooltool.basicperson.vocabularies.advisorVocabularyFactory"
+        provides="zope.schema.interfaces.IVocabularyFactory"
+        name="schooltool.basicperson.advisor_vocabulary" />
+    ''')
+    app = AppStub()
+    test.globs.update({
+        'app': app,
+    })
 
 
 def tearDown(test):
-    setup.placelessTearDown()
+    setup.placefulTearDown()
+    abort()
 
 
 def test_suite():

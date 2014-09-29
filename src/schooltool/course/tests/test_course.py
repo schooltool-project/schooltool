@@ -20,9 +20,14 @@ Unit tests for course and section implementations.
 """
 import unittest
 import doctest
+
 from zope.interface.verify import verifyObject
 
-from schooltool.relationship.tests import setUp, tearDown
+from schooltool.course.interfaces import ISectionContainer
+from schooltool.course.tests import setUp, tearDown
+from schooltool.course.tests import setUpSchoolYear
+from schooltool.course.tests import setUpTerms
+
 
 
 def doctest_CourseContainer():
@@ -56,7 +61,7 @@ def doctest_Course():
     members.
 
         >>> from schooltool.course.course import Course
-        >>> algebraI = Course("Algebra I", "First year math.")
+        >>> algebraI = courses['alegra'] = Course("Algebra I", "First year math.")
         >>> from schooltool.course.interfaces import ICourse
         >>> verifyObject(ICourse, algebraI)
         True
@@ -84,10 +89,10 @@ def doctest_Course():
         >>> from schooltool.course.course import Course
         >>> from schooltool.course.section import Section
         >>> from schooltool.person.person import Person
-        >>> section1 = Section(title="section1")
-        >>> section2 = Section(title="section2")
-        >>> section3 = Section(title="section3")
-        >>> person = Person()
+        >>> section1 = sections['1'] = Section(title="section1")
+        >>> section2 = sections['2'] = Section(title="section2")
+        >>> section3 = sections['3'] = Section(title="section3")
+        >>> person = persons['person'] = Person('Person', 'Person')
 
     Our course doesn't have any sections yet:
 
@@ -137,7 +142,7 @@ def doctest_Section():
     r"""Tests for course section groups.
 
         >>> from schooltool.course.section import Section
-        >>> section = Section(title="section 1", description="advanced")
+        >>> section = sections['1'] = Section(title="section 1", description="advanced")
         >>> from schooltool.course.interfaces import ISection
         >>> verifyObject(ISection, section)
         True
@@ -154,15 +159,18 @@ def doctest_Section():
     We'll add an instructor to the section.
 
         >>> from schooltool.person.person import Person
-        >>> teacher = Person('teacher', 'Mr. Jones')
+        >>> teacher = persons['teacher'] = Person('teacher', 'Mr. Jones')
         >>> section.instructors.add(teacher)
 
     Now we'll add some learners to the Section with the sections membership
     RelationshipProperty.
 
-        >>> section.members.add(Person('first','First'))
-        >>> section.members.add(Person('second','Second'))
-        >>> section.members.add(Person('third','Third'))
+        >>> first = persons['first'] = Person('first','First')
+        >>> second = persons['second'] = Person('second','Second')
+        >>> third = persons['third'] = Person('third','Third')
+        >>> section.members.add(first)
+        >>> section.members.add(second)
+        >>> section.members.add(third)
 
         >>> for person in section.members:
         ...     print person.title
@@ -175,7 +183,7 @@ def doctest_Section():
     We can add a Group as a member
 
         >>> from schooltool.group.group import Group
-        >>> group = Group('group','Group')
+        >>> group = groups['group'] = Group('group','Group')
         >>> section.members.add(group)
         >>> for member in section.members:
         ...     print member.title
@@ -191,8 +199,10 @@ def doctest_Section():
 
     If the group grows, our section grows as well:
 
-        >>> group.members.add(Person('fourth','Fourth'))
-        >>> group.members.add(Person('fifth','Fifth'))
+        >>> fourth = persons['fourth'] = Person('fourth','Fourth')
+        >>> fifth = persons['fifth'] = Person('fifth','Fifth')
+        >>> group.members.add(fourth)
+        >>> group.members.add(fifth)
         >>> section.size
         5
 
@@ -209,14 +219,15 @@ def doctest_Section():
 
     Labels are updated dynamically when more instructors are added.
 
-        >>> section.instructors.add(Person('teacher2', 'Mrs. Smith'))
+        >>> teacher2 = persons['teacher2'] = Person('teacher2', 'Mrs. Smith')
+        >>> section.instructors.add(teacher2)
         >>> translate(section.label)
         u'Mr. Jones; Mrs. Smith -- section 1'
 
     The course should be listed in courses:
 
         >>> from schooltool.course.course import Course
-        >>> course = Course(title="US History")
+        >>> course = courses['history'] = Course(title="US History")
         >>> course.sections.add(section)
         >>> for course in section.courses:
         ...     print course.title
@@ -224,7 +235,7 @@ def doctest_Section():
 
     Sections can be part of more than one Course:
 
-        >>> english = Course(title="English")
+        >>> english = courses['english'] = Course(title="English")
         >>> section.courses.add(english)
         >>> for course in section.courses:
         ...     print course.title
@@ -245,6 +256,11 @@ def doctest_Section_linking():
     * it is impossible to create linking loops.
 
         >>> from schooltool.course.section import Section
+        >>> from zope.component import provideAdapter
+        >>> from schooltool.course.section import getTermForSectionContainer
+        >>> from schooltool.term.interfaces import ITerm
+        >>> from zope.container.interfaces import IBTreeContainer
+        >>> provideAdapter(lambda t: sections, [IBTreeContainer], ITerm)
 
         >>> def section_link_str(s):
         ...     return '%s <- %s -> %s' % (
@@ -266,7 +282,17 @@ def doctest_Section_linking():
 
     Create some sections.
 
-        >>> sections = [Section('Sec0'), Section('Sec1'), Section('Sec2')]
+        >>> year = setUpSchoolYear(2000)
+        >>> setUpTerms(year, 3)
+        >>> n = 0
+        >>> sections = []
+        >>> for term in sorted(year.values(), key=lambda t: t.first):
+        ...     term_sections = ISectionContainer(term)
+        ...     name = 'Sec%d' % n
+        ...     section = Section(name)
+        ...     term_sections[name] = section
+        ...     sections.append(section)
+        ...     n += 1
 
     By default sections are not linked.
 
@@ -349,11 +375,20 @@ def doctest_Section_linking():
 
     Create a long list of linked sections.
 
-        >>> sections = [Section('Sec0')]
-        >>> for n in range(5):
-        ...     new_sec = Section('Sec%d' % (n+1))
-        ...     new_sec.previous = sections[-1]
-        ...     sections.append(new_sec)
+        >>> year = setUpSchoolYear(2001)
+        >>> setUpTerms(year, 6)
+        >>> n = 0
+        >>> sections = []
+        >>> current = None
+        >>> for term in sorted(year.values(), key=lambda t: t.first):
+        ...     term_sections = ISectionContainer(term)
+        ...     name = 'Sec%d' % n
+        ...     section = Section(name)
+        ...     term_sections[name] = section
+        ...     section.previous = current
+        ...     current = section
+        ...     sections.append(section)
+        ...     n += 1
 
         >>> print_sections(sections)
         None <- Sec0 -> Sec1
@@ -363,29 +398,8 @@ def doctest_Section_linking():
         Sec3 <- Sec4 -> Sec5
         Sec4 <- Sec5 -> None
 
-    Try to introduce a loop by assigning a previous section.
-
-        >>> sections[4].previous = sections[1]
-
-    Note that sections 2 and 3 are removed from the linked list thus avoiding
-    the loop.
-
-        >>> print_sections(sections)
-        None <- Sec0 -> Sec1
-        Sec0 <- Sec1 -> Sec4
-        None <- Sec2 -> None
-        None <- Sec3 -> None
-        Sec1 <- Sec4 -> Sec5
-        Sec4 <- Sec5 -> None
-
         >>> [s.title for s in sections[0].linked_sections]
-        ['Sec0', 'Sec1', 'Sec4', 'Sec5']
-
-    Let's reubild the list of 5 linked sections.
-
-        >>> sections[4].previous = sections[3]
-        >>> sections[3].previous = sections[2]
-        >>> sections[2].previous = sections[1]
+        ['Sec0', 'Sec1', 'Sec2', 'Sec3', 'Sec4', 'Sec5']
 
         >>> print_linked(sections)
         Sec0 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
@@ -394,53 +408,6 @@ def doctest_Section_linking():
         Sec3 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
         Sec4 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
         Sec5 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
-
-
-    Try to introduce a loop by assigning a next section.
-
-        >>> sections[1].next = sections[4]
-
-    Note that sections 2 and 3 are removed from the linked list thus avoiding
-    the loop again.
-
-        >>> print_sections(sections)
-        None <- Sec0 -> Sec1
-        Sec0 <- Sec1 -> Sec4
-        None <- Sec2 -> None
-        None <- Sec3 -> None
-        Sec1 <- Sec4 -> Sec5
-        Sec4 <- Sec5 -> None
-
-        >>> [s.title for s in sections[0].linked_sections]
-        ['Sec0', 'Sec1', 'Sec4', 'Sec5']
-
-    Let's reubild the list of 5 linked sections.
-
-        >>> sections[3].next = sections[4]
-        >>> sections[2].next = sections[3]
-        >>> sections[1].next = sections[2]
-
-        >>> print_linked(sections)
-        Sec0 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
-        Sec1 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
-        Sec2 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
-        Sec3 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
-        Sec4 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
-        Sec5 spans: Sec0, Sec1, Sec2, Sec3, Sec4, Sec5
-
-    And try to introduce another loop.
-
-        >>> sections[0].previous = sections[3]
-
-    Sections between Sec0 and Sec3 were unlinked to avoid the loop.
-
-        >>> print_linked(sections)
-        Sec0 spans: Sec3, Sec0
-        Sec1 spans: Sec1
-        Sec2 spans: Sec2
-        Sec3 spans: Sec3, Sec0
-        Sec4 spans: Sec4, Sec5
-        Sec5 spans: Sec4, Sec5
 
     """
 
@@ -452,10 +419,10 @@ def doctest_PersonInstructorCrowd():
 
         >>> from schooltool.course.section import Section
         >>> from schooltool.person.person import Person
-        >>> section = Section(title="section 1", description="advanced")
-        >>> teacher = Person('teacher', 'Mr. Jones')
-        >>> p1 = Person('p1','First')
-        >>> p2 = Person('p2','Second')
+        >>> section = sections['1'] = Section(title="section 1", description="advanced")
+        >>> teacher = persons['teacher'] = Person('teacher', 'Mr. Jones')
+        >>> p1 = persons['p1'] = Person('p1','First')
+        >>> p2 = persons['p2'] = Person('p2','Second')
 
     Let the first pupil be a direct member of the section taught by Mr. Jones.
 
@@ -487,9 +454,9 @@ def doctest_PersonLearnerAdapter(self):
 
         >>> from schooltool.course.section import Section
         >>> from schooltool.person.person import Person
-        >>> section1 = Section(title="section 1", description="advanced")
-        >>> section2 = Section(title="section 2", description="advanced")
-        >>> student = Person('student', 'Mr. Peter')
+        >>> section1 = sections['1'] = Section(title="section 1", description="advanced")
+        >>> section2 = sections['2'] = Section(title="section 2", description="advanced")
+        >>> student = persons['student'] = Person('student', 'Mr. Peter')
 
      Let's add the student to the two sections.
 

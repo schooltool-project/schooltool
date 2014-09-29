@@ -65,7 +65,7 @@ class TestAuthSetUpSubscriber(unittest.TestCase):
 
 def test_suite():
     optionflags = (doctest.ELLIPSIS |
-                   doctest.NORMALIZE_WHITESPACE |
+                   doctest.NORMALIZE_WHITESPACE | doctest.REPORT_ONLY_FIRST_FAILURE |
                    doctest.REPORT_NDIFF)
     return unittest.TestSuite([
         unittest.makeSuite(TestAuthSetUpSubscriber),

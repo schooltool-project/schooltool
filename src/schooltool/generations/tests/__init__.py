@@ -1,33 +1,23 @@
 """
 Tests for generation scripts.
 """
+from transaction import abort
+
 from zope.interface import implements
 from zope.keyreference.interfaces import IKeyReference
 from zope.app.testing.setup import setUpAnnotations
-from zope.app.publication.zopepublication import ZopePublication
-from zope.site.folder import rootFolder
 from zope.app.testing import setup
+from ZODB.interfaces import IConnection
+
+from schooltool.testing.setup import getIntegrationTestZCML
+from schooltool.testing.stubs import AppStub
 
 
 class ContextStub(object):
-    """Stub for the context argument passed to evolve scripts.
 
-        >>> from zope.app.generations.utility import getRootFolder
-        >>> context = ContextStub()
-        >>> getRootFolder(context) is context.root_folder
-        True
-
-    """
-
-    class ConnectionStub(object):
-        def __init__(self, root_folder):
-            self.root_folder = root_folder
-        def root(self):
-            return {ZopePublication.root_name: self.root_folder}
-
-    def __init__(self):
-        self.root_folder = rootFolder()
-        self.connection = self.ConnectionStub(self.root_folder)
+    def __init__(self, app):
+        self.root_folder = app
+        self.connection = IConnection(app)
 
 
 _d = {}
@@ -95,3 +85,18 @@ def catalogTearDown(test):
     """This code is deprecated, to be used only by old evolution tests."""
     setup.placefulTearDown()
     _d.clear()
+
+
+def setUp(test):
+    setup.placefulSetUp()
+    zcml = getIntegrationTestZCML()
+    app = AppStub()
+    test.globs.update({
+        'app': app,
+        'zcml': zcml,
+    })
+
+
+def tearDown(test):
+    setup.placefulTearDown()
+    abort()

@@ -29,8 +29,8 @@ from zope.publisher.browser import BrowserView
 from zope.traversing.interfaces import IContainmentRoot
 from zope.component import provideAdapter
 
-from schooltool.app.browser.testing import setUp, tearDown
-from schooltool.testing import setup
+from schooltool.course.tests import setUp, tearDown
+
 
 class AddingStub(BrowserView):
     pass
@@ -121,7 +121,7 @@ def doctest_CourseCSVImporter():
 
         >>> from schooltool.course.browser.csvimport import CourseCSVImporter
         >>> from schooltool.course.course import CourseContainer
-        >>> container = CourseContainer()
+        >>> container = courses
         >>> importer = CourseCSVImporter(container, None)
 
     Import some sample data
@@ -220,7 +220,7 @@ def doctest_CourseCSVImporter_reimport():
 
         >>> from schooltool.course.browser.csvimport import CourseCSVImporter
         >>> from schooltool.course.course import CourseContainer
-        >>> container = CourseContainer()
+        >>> container = courses
         >>> importer = CourseCSVImporter(container, None)
 
     Import some sample data
@@ -322,7 +322,7 @@ def doctest_CourseCSVImportView():
         >>> from schooltool.course.browser.csvimport import CourseCSVImportView
         >>> from schooltool.course.course import CourseContainer
         >>> from zope.publisher.browser import TestRequest
-        >>> container = CourseContainer()
+        >>> container = courses
         >>> request = TestRequest()
 
     Now we'll try a text import.  Note that the description is not required
@@ -381,20 +381,9 @@ def doctest_SectionView():
 
         >>> from schooltool.course.browser.section import SectionView
         >>> from schooltool.course.section import Section
-        >>> section = Section()
+        >>> section = sections['section'] = Section()
         >>> request = TestRequest()
         >>> view = SectionView(section, request)
-
-    Stub the app.
-
-        >>> from schooltool.person.person import Person, PersonContainer
-
-        >>> class AppStub(dict):
-        ...    pass
-        >>> app = AppStub(persons=PersonContainer())
-
-        >>> from schooltool.app.interfaces import ISchoolToolApplication
-        >>> provideAdapter(lambda x: app, (None,), ISchoolToolApplication)
 
     Stub a table formatter.
 
@@ -413,6 +402,7 @@ def doctest_SectionView():
         >>> from zope.publisher.interfaces.http import IHTTPRequest
         >>> from schooltool.person.interfaces import IPersonContainer
 
+        >>> from schooltool.person.person import Person
         >>> from schooltool.table.interfaces import ITableFormatter
         >>> provideAdapter(lambda p, r: TableFormatterStub(p, r),
         ...                adapts=(IPersonContainer, IHTTPRequest),
@@ -420,9 +410,9 @@ def doctest_SectionView():
 
     Let's add some students.
 
-        >>> person1 = Person(title='Person1')
-        >>> person2 = Person(title='Person2')
-        >>> person3 = Person(title='Person3')
+        >>> person1 = persons['p1'] = Person('Person1', 'Person1')
+        >>> person2 = persons['p2'] = Person('Person2', 'Person2')
+        >>> person3 = persons['p3'] = Person('Person3', 'Person3')
         >>> section.members.add(person1)
         >>> section.members.add(person2)
         >>> section.members.add(person3)
@@ -450,7 +440,6 @@ def doctest_SectionEditView():
 
     We need some setup:
 
-        >>> app = setup.setUpSchoolToolSite()
         >>> from schooltool.resource.resource import Location
         >>> app['resources']['room1'] = room1 = Location("Room 1")
 
@@ -530,10 +519,9 @@ def doctest_SectionMemberCSVImporter():
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> from schooltool.person.person import Person
         >>> from schooltool.course.section import PersonLearnerAdapter
-        >>> school = setup.setUpSchoolToolSite()
-        >>> provideAdapter(lambda context: school, (None,), ISchoolToolApplication)
+        >>> school = app
+
         >>> persons = school['persons']
-        >>> directlyProvides(school, IContainmentRoot)
         >>> smith = persons['smith'] = Person('smith', 'John Smith')
         >>> [section.title for section in PersonLearnerAdapter(smith).sections()]
         []
@@ -548,7 +536,7 @@ def doctest_SectionMemberCSVImporter():
 
         >>> from schooltool.course.browser.csvimport import SectionMemberCSVImporter
         >>> from schooltool.course.section import Section
-        >>> section = Section('Section title', 'Section description')
+        >>> section = sections['section'] = Section('Section title', 'Section description')
         >>> [person.username for person in section.members]
         []
         >>> importer = SectionMemberCSVImporter(section, None)
@@ -573,7 +561,7 @@ def doctest_SectionMemberCSVImporter():
 
     Create another section and another importer
 
-        >>> another_section = Section('Another section', 'Another description')
+        >>> another_section = sections['another'] = Section('Another section', 'Another description')
         >>> [person.username for person in another_section.members]
         []
         >>> another_importer = SectionMemberCSVImporter(another_section, None)
@@ -607,10 +595,9 @@ def doctest_SectionMemberCSVImportView():
         >>> from zope.i18n import translate
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> from schooltool.person.person import Person
-        >>> school = setup.setUpSchoolToolSite()
-        >>> provideAdapter(lambda context: school, (None,), ISchoolToolApplication)
+        >>> school = app
+
         >>> persons = school['persons']
-        >>> directlyProvides(school, IContainmentRoot)
         >>> smith = persons['smith'] = Person('smith', 'John Smith')
         >>> jones = persons['jones'] = Person('jones', 'Sally Jones')
         >>> stevens = persons['stevens'] = Person('stevens', 'Bob Stevens')
@@ -621,7 +608,7 @@ def doctest_SectionMemberCSVImportView():
         ...      SectionMemberCSVImportView
         >>> from schooltool.course.section import Section
         >>> from zope.publisher.browser import TestRequest
-        >>> section = Section('Section title', 'Section description')
+        >>> section = sections['section'] = Section('Section title', 'Section description')
         >>> request = TestRequest()
 
     Now we'll try a text import.
@@ -673,7 +660,7 @@ def doctest_SectionInstructorView():
 
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> from schooltool.person.person import Person
-        >>> school = setup.setUpSchoolToolSite()
+        >>> school = app
         >>> provideAdapter(lambda context: school, (None,), ISchoolToolApplication)
         >>> persons = school['persons']
         >>> directlyProvides(school, IContainmentRoot)
@@ -711,7 +698,7 @@ def doctest_SectionLearnerView():
 
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> from schooltool.person.person import Person
-        >>> school = setup.setUpSchoolToolSite()
+        >>> school = app
         >>> provideAdapter(lambda context: school, (None,), ISchoolToolApplication)
         >>> persons = school['persons']
         >>> directlyProvides(school, IContainmentRoot)
@@ -788,10 +775,9 @@ def doctest_CoursesViewlet():
         >>> from schooltool.course.browser.course import CoursesViewlet
         >>> from schooltool.person.person import Person
 
-        >>> school = setup.setUpSchoolToolSite()
+        >>> school = app
         >>> persons = school['persons']
         >>> from schooltool.course.section import SectionContainer
-        >>> sections = SectionContainer()
 
         >>> persons['teacher'] = teacher = Person("Teacher")
         >>> teacher_view = CoursesViewlet(teacher, TestRequest(), None, None)

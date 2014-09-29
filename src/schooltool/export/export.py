@@ -589,7 +589,8 @@ class MegaExporter(SchoolTimetableExportView):
 
     def format_courses(self):
         def get_course_level(course):
-            return ', '.join([l.__name__ for l in course.levels])
+            if course.levels:
+                return ', '.join([l.__name__ for l in course.levels])
         fields = [('School Year', Text, lambda c: ISchoolYear(c).__name__),
                   ('ID', Text, attrgetter('__name__')),
                   ('Title', Text, attrgetter('title')),

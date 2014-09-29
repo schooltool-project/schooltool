@@ -52,8 +52,6 @@ SectionTimetables sheets:
     has an invalid course id for the given school year:
     B8
     has an invalid resource id:
-    J6-8
-    has an invalid username:
     I6-8
     invalid school year:
     A6-7
@@ -166,11 +164,11 @@ This file has examples of bad data for the Persons sheet:
     gender must be male or female:
     I2
     has no date in it:
-    H2, Q2-3
+    H2, T2-3
     missing required text:
-    C2, E2, P2, R2
+    C2, E2, S2, U2
     must be either TRUE, FALSE, YES or NO (upper, lower and mixed case are all valid):
-    R3
+    U3
 
 We'll remove the demo fields to not break future tests.
 
@@ -229,7 +227,7 @@ This file has examples of bad data for the Groups sheet:
     invalid school year:
     B13
     is not a valid username:
-    A23
+    A22
     missing required text:
     B1-3
 
@@ -249,7 +247,7 @@ Relationships sheets:
     ---------------------
     Username cannot contain non-ascii characters:
     A3, B3
-    is not a valid contact relationship:
+    is not a valid relationship code:
     C4
     is not a valid username:
     A4

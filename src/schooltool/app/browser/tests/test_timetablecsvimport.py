@@ -27,6 +27,7 @@ from zope.app.testing import setup as zope_setup
 from zope.interface import Interface
 from zope.component import provideAdapter, provideUtility, provideHandler
 from zope.component.hooks import getSite, setSite
+from zope.container.btree import BTreeContainer
 from zope.i18n import translate
 from zope.intid import IntIds
 from zope.intid import addIntIdSubscriber
@@ -58,8 +59,8 @@ from schooltool.term.term import getTermContainer
 from schooltool.term.term import getSchoolYearForTerm
 from schooltool.term.term import listTerms
 from schooltool.testing import registry as testing_registry
-from schooltool.testing.setup import setUpSchoolToolSite
-from schooltool.testing.stubs import KeyReferenceStub
+from schooltool.testing.setup import getIntegrationTestZCML
+from schooltool.testing.stubs import KeyReferenceStub, AppStub
 from schooltool.timetable.interfaces import IScheduleContainer
 from schooltool.timetable.app import getTimetableContainer
 from schooltool.timetable.app import getScheduleContainer
@@ -68,6 +69,7 @@ from schooltool.timetable.interfaces import ITimetableContainer
 from schooltool.timetable.daytemplates import CalendarDayTemplates
 from schooltool.timetable.daytemplates import WeekDayTemplates
 from schooltool.timetable.daytemplates import DayTemplate
+from schooltool.timetable.daytemplates import DayTemplateContainer
 from schooltool.timetable.daytemplates import TimeSlot
 from schooltool.timetable.schedule import Period
 from schooltool.timetable.timetable import Timetable
@@ -83,7 +85,7 @@ def print_schedule(schedule):
 
 def setUpYear():
     app = ISchoolToolApplication(None)
-    syc = ISchoolYearContainer(app)
+    syc = getSchoolYearContainer(app)
     syc['2010-2011'] = SchoolYear(u'2010-2011',
                                   datetime.date(2010, 9, 1),
                                   datetime.date(2011, 5, 30))
@@ -133,6 +135,14 @@ def addTimetableDays(tt, days, periods):
             day[period.lower()] = TimeSlot(time, duration)
 
 
+def initTemplates(periods):
+    # XXX: avoid the notify(containedEvent()) used in DayTemplateSchedule.initTemplates
+    templates = DayTemplateContainer()
+    templates.__parent__ = periods
+    templates.__name__ = 'templates'
+    periods.templates = templates
+    transaction.commit()
+
 def setUpTimetables():
     app = ISchoolToolApplication(None)
     TimetableStartUp(app)()
@@ -143,9 +153,9 @@ def setUpTimetables():
         sy.first, sy.last, title=u"Rotating")
 
     tt_rot.periods = CalendarDayTemplates()
-    tt_rot.periods.initTemplates()
+    initTemplates(tt_rot.periods)
     tt_rot.time_slots = CalendarDayTemplates()
-    tt_rot.time_slots.initTemplates()
+    initTemplates(tt_rot.time_slots)
     addTimetableDays(
         tt_rot,
         [('1', 'Day 1'), ('2', 'Day 2'), ('3', 'Day 3')],
@@ -155,9 +165,9 @@ def setUpTimetables():
         sy.first, sy.last, title=u"Weekly")
 
     tt_week.periods = WeekDayTemplates()
-    tt_week.periods.initTemplates()
+    initTemplates(tt_week.periods)
     tt_week.time_slots = WeekDayTemplates()
-    tt_week.time_slots.initTemplates()
+    initTemplates(tt_week.time_slots)
 
     dows = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
             'Friday', 'Saturday', 'Sunday']
@@ -589,22 +599,10 @@ def doctest_TimetableCSVImporter_reimport():
     """
 
 
-def setUpIntIds():
-    provideAdapter(KeyReferenceStub)
-    provideHandler(addIntIdSubscriber,
-                   [ILocation, IObjectAddedEvent])
-    provideUtility(IntIds(), IIntIds)
-    testing_registry.setupTimetablesComponents()
-
-
 def docSetUp(test=None):
     zope_setup.placefulSetUp()
     zope_setup.setUpAnnotations()
     zope_setup.setUpTraversal()
-    test.globs['app'] = setUpSchoolToolSite()
-    setUpRelationships()
-
-    provideAdapter(getSchoolYearContainer)
     provideAdapter(getTermContainer, (Interface,))
     provideAdapter(getSchoolYearForTerm)
     provideAdapter(getCourseContainer)
@@ -614,11 +612,13 @@ def docSetUp(test=None):
     provideAdapter(getTermForSectionContainer)
     provideAdapter(getTimetableContainer)
     provideAdapter(getScheduleContainer)
-    setUpIntIds()
+    testing_registry.setupTimetablesComponents()
 
     provideAdapter(SectionNameChooser, (ISectionContainer,))
-
-    transaction.begin()
+    zcml = getIntegrationTestZCML()
+    zcml.include('schooltool.schoolyear', file='schoolyear.zcml')
+    app = test.globs['app'] = AppStub()
+    app['persons'] = BTreeContainer()
 
 
 def docTearDown(test=None):
@@ -631,7 +631,7 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(
         setUp=docSetUp, tearDown=docTearDown,
-        optionflags=doctest.ELLIPSIS|doctest.REPORT_NDIFF))
+        optionflags=doctest.ELLIPSIS|doctest.REPORT_NDIFF|doctest.REPORT_ONLY_FIRST_FAILURE))
     return suite
 
 

@@ -20,6 +20,7 @@ Unit tests for catalogs
 """
 import unittest
 import doctest
+from transaction import abort
 
 from zope.app.testing import setup
 from zope.interface import implements, Interface
@@ -30,13 +31,10 @@ from zope.site import SiteManagerContainer
 from zope.site.folder import rootFolder
 
 from schooltool.testing.setup import ZCMLWrapper
+from schooltool.testing.stubs import AppStub
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.app.interfaces import ICatalogs
 from schooltool.app.catalog import getAppCatalogs
-
-
-class AppStub(dict, SiteManagerContainer):
-    implements(ISchoolToolApplication)
 
 
 class CatalogStub(dict):
@@ -50,10 +48,6 @@ class CatalogStub(dict):
 
 def provideApplicationStub():
     app = AppStub()
-    provideAdapter(
-        lambda ignored: app,
-        adapts=(None,),
-        provides=ISchoolToolApplication)
     return app
 
 
@@ -70,7 +64,7 @@ def doctest_Catalogs():
         >>> catalogs = ICatalogs(app)
 
         >>> list(app.items())
-        [('schooltool.app.catalog:Catalogs',
+        [(u'schooltool.app.catalog:Catalogs',
           <schooltool.app.catalog.Catalogs object at ...>)]
 
         >>> verifyObject(ICatalogs, catalogs)
@@ -170,6 +164,7 @@ def doctest_CatalogFactory():
     """Tests for CatalogFactory.
 
         >>> app = provideApplicationStub()
+        >>> catalogs = ICatalogs(app)
 
     CatalogFactory is a base class for creating and registering versioned catalogs.
 
@@ -214,9 +209,6 @@ def doctest_CatalogFactory():
 
         >>> print CatalogFactoryForTest.key()
         catalog:schooltool.app.tests.test_catalog.CatalogFactoryForTest
-
-        >>> print CatalogFactoryForTest.get()
-        None
 
     Well, the catalog was not set up yet.  Let's build it.
 
@@ -700,6 +692,7 @@ def setUp(test):
 
 def tearDown(test):
     setup.placefulTearDown()
+    abort()
 
 
 def provideStubAdapter(factory, adapts=None, provides=None, name=u''):
@@ -733,7 +726,7 @@ def setUpIntegration(test):
 
 def test_suite():
     optionflags = (doctest.NORMALIZE_WHITESPACE |
-                   doctest.ELLIPSIS |
+                   doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE |
                    doctest.REPORT_NDIFF)
     return unittest.TestSuite([
         doctest.DocTestSuite(setUp=setUp, tearDown=tearDown,

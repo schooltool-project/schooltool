@@ -65,32 +65,24 @@ to `IRelationshipLinks`, it is enough to declare that our objects are
 
     >>> from zope.interface import implements
     >>> from zope.annotation.interfaces import IAttributeAnnotatable
-    >>> class SomeObject(object):
+    >>> from zope.container.contained import Contained
+    >>> from persistent import Persistent
+    >>> class SomeObject(Persistent, Contained):
     ...     implements(IAttributeAnnotatable)
     ...     def __init__(self, name):
+    ...         Persistent.__init__(self)
+    ...         Contained.__init__(self)
     ...         self._name = name
     ...     def __repr__(self):
     ...         return self._name
-
-We need some setup to make Zope 3 annotations work.
-
-    >>> from zope.app.testing import setup
-    >>> setup.placelessSetUp()
-    >>> setup.setUpAnnotations()
-
-We need to define the adapter from `IAnnotatable` to `IRelationshipLinks`.
-In real life you would include the ZCML configuration of the
-``schooltool.relationship`` package via Zope 3 package includes.  In a test
-you can use `setUpRelationships` from ``schooltool.relationship.tests``.
-
-    >>> from schooltool.relationship.tests import setUpRelationships
-    >>> setUpRelationships()
+    >>> from zope.site.hooks import setSite
+    >>> setSite(app)
 
 You can create relationships by calling the `relate` function
 
     >>> from schooltool.relationship import relate
-    >>> frogs = SomeObject('frogs')
-    >>> frogger = SomeObject('frogger')
+    >>> frogs = groups['frogs'] = SomeObject('frogs')
+    >>> frogger = persons['frogger'] = SomeObject('frogger')
     >>> relate(URIMembership, (frogs, URIGroup), (frogger, URIMember))
 
 Since you will always want to use a particular set of roles for a given
@@ -101,7 +93,7 @@ shortcut::
     >>> Membership = RelationshipSchema(URIMembership, group=URIGroup,
     ...                                 member=URIMember)
 
-    >>> lilfroggy = SomeObject('lilfroggy')
+    >>> lilfroggy = persons['lilfroggy'] = SomeObject('lilfroggy')
     >>> Membership(member=lilfroggy, group=frogs)
 
 If you try to create the same relationship between the same objects more
@@ -139,7 +131,7 @@ in a `URIMembership` relationship.
 
     >>> getRelatedObjects(frogger, URIGroup, URIMembership)
     [frogs]
-    >>> getRelatedObjects(frogger, URIGroup, 'example:Groupship')
+    >>> getRelatedObjects(frogger, URIGroup, URIObject('example:Groupship'))
     []
 
 In general, avoid reusing the same role for different relationship types.
@@ -190,8 +182,8 @@ calling global functions and passing roles around::
 
 Usage example::
 
-    >>> fido = Member('fido')
-    >>> dogs = Group('dogs')
+    >>> fido = persons['fido'] = Member('fido')
+    >>> dogs = groups['dogs'] = Group('dogs')
 
     >>> list(fido.groups)
     []
@@ -224,10 +216,6 @@ Usage example::
 Events
 ------
 
-    >>> import zope.event
-    >>> old_subscribers = zope.event.subscribers
-    >>> zope.event.subscribers = []
-
 Before you establish a relationship, a `BeforeRelationshipEvent` is sent out.
 You can implement constraints by raising an exception in an event subscriber::
 
@@ -242,7 +230,8 @@ You can implement constraints by raising an exception in an event subscriber::
     ...             event[URIGroup] is frogs and
     ...             not IFrog.providedBy(event[URIMember])):
     ...         raise Exception("Only frogs can be members of the frogs group")
-    >>> zope.event.subscribers.append(no_toads)
+    >>> from zope.component import provideHandler
+    >>> provideHandler(no_toads, [IBeforeRelationshipEvent])
 
     >>> toady = SomeObject('toady')
     >>> Membership(member=toady, group=frogs)
@@ -261,9 +250,9 @@ When you establish a relationship, a `RelationshipAddedEvent` is sent out::
     ...                     event.participant2, event.role2.name)
     ...         if event.extra_info:
     ...             print '(BTW, %s)' % event.extra_info
-    >>> zope.event.subscribers.append(my_subscriber)
+    >>> provideHandler(my_subscriber, [IRelationshipAddedEvent])
 
-    >>> kermit = SomeObject('kermit')
+    >>> kermit = persons['kermit'] = SomeObject('kermit')
     >>> directlyProvides(kermit, IFrog)
     >>> Membership(member=kermit, group=frogs)
     Relationship Membership added between kermit (Member) and frogs (Group)
@@ -291,7 +280,8 @@ When you break a relationship, a `RelationshipRemovedEvent` is sent out::
     ...                     event.participant2, event.role2.name)
     ...         if event.extra_info:
     ...             print '(BTW, %s)' % event.extra_info
-    >>> zope.event.subscribers.append(my_subscriber)
+    >>> provideHandler(my_subscriber, [IBeforeRemovingRelationshipEvent])
+    >>> provideHandler(my_subscriber, [IRelationshipRemovedEvent])
 
     >>> Membership.unlink(member=kermit, group=frogs)
     Please don't leave us!
@@ -314,7 +304,7 @@ Symmetric relationships work too::
     >>> class FriendlyObject(SomeObject):
     ...     friends = RelationshipProperty(URIFriendship, URIFriend, URIFriend)
 
-    >>> neko = FriendlyObject('neko')
+    >>> neko = persons['neko'] = FriendlyObject('neko')
     >>> neko.friends.add(kermit)
     Relationship Friendship added between neko (Friend) and kermit (Friend)
     >>> list(neko.friends)
@@ -373,7 +363,7 @@ You can then use it like this::
     >>> class Friend(SomeObject):
     ...     friends = FriendshipProperty()
 
-    >>> fluffy = Friend('fluffy')
+    >>> fluffy = persons['fluffy'] = Friend('fluffy')
     >>> fluffy.friends.add(kermit,
     ...         'fluffy just met kermit, but fluffy is very friendly')
     Relationship Friendship added between fluffy (Friend) and kermit (Friend)
@@ -418,10 +408,4 @@ Caveats
   subobjects related with other objects that are not located within the
   original object.  To do so, declare and `IObjectCopier` adapter for the object
   and make the `copyable` method return False.
-
-
-.. Cleaning up
-
-    >>> zope.event.subscribers = old_subscribers
-    >>> setup.placelessTearDown()
 

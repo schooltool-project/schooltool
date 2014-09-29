@@ -31,21 +31,7 @@ from z3c import form
 from schooltool.schoolyear.ftesting import schoolyear_functional_layer
 import schooltool.skin.widgets
 from schooltool import skin
-from schooltool.app.browser.testing import setUp, tearDown
-
-
-def setUpAppAbsoluteURL():
-    from schooltool.app.interfaces import ISchoolToolApplication
-    from zope.traversing.browser.interfaces import IAbsoluteURL
-    from zope.publisher.interfaces.http import IHTTPRequest
-    class App(object):
-        zope.interface.implements(ISchoolToolApplication)
-    zope.component.provideAdapter(
-        lambda ignored: App(),
-        adapts=(None, ), provides=ISchoolToolApplication)
-    zope.component.provideAdapter(
-        lambda app, request: lambda: request.getApplicationURL(),
-        adapts=(App, IHTTPRequest), provides=IAbsoluteURL)
+from schooltool.schoolyear.testing import setUp, tearDown
 
 
 class FormRequest(TestRequest):
@@ -64,8 +50,6 @@ def doctest_HTMLFragmentWidget():
 
 def doctest_CkeditorZ3CFormWidget_CkeditorConfig():
     """Tests for CkeditorZ3CFormWidget and CkeditorConfig.
-
-        >>> setUpAppAbsoluteURL()
 
     We'll need a field first.
 
@@ -177,8 +161,6 @@ def doctest_CkeditorZ3CFormWidget_CkeditorConfig():
 
 def doctest_CkeditorZ3CWidget_compatibility():
     r"""Tests for CkeditorZ3CFormWidget compatibility with zope.html.
-
-        >>> setUpAppAbsoluteURL()
 
     We'll need a field first.
 

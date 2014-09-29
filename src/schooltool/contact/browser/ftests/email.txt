@@ -54,7 +54,7 @@ Add a contact with email for Ariana:
     >>> manager.getControl('First name').value = 'Marcela'
     >>> manager.getControl('Last name').value = 'Ortiz'
     >>> manager.getControl('Email').value = 'marcela@example.com'
-    >>> manager.getControl('Relationship').value = ['parent']
+    >>> manager.getControl('Relationship').value = ['p-']
     >>> manager.getControl('Add').click()
 
 Add a contact with no email for Mario:
@@ -67,7 +67,7 @@ Add a contact with no email for Mario:
     >>> manager.getLink('Create new contact').click()
     >>> manager.getControl('First name').value = 'Karina'
     >>> manager.getControl('Last name').value = 'Cerna'
-    >>> manager.getControl('Relationship').value = ['parent']
+    >>> manager.getControl('Relationship').value = ['p-']
     >>> manager.getControl('Add').click()
 
 A teacher will be able to send a student contact an email only if:

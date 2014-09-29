@@ -44,6 +44,7 @@ def guessMostRecentLevels(app):
     syc = ISchoolYearContainer(app, None)
     int_ids = getUtility(IIntIds)
 
+
     years = list(reversed(syc.sorted_schoolyears))
     active_year = syc.getActiveSchoolYear()
     if active_year is not None:

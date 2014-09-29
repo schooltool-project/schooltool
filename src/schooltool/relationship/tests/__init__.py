@@ -28,6 +28,8 @@ This module also contains some stub objects for use in tests (SomeObject and
 SomeContained).
 """
 
+from persistent import Persistent
+
 from zope.app.testing import setup
 from zope.interface import implements
 from zope.location.pickling import LocationCopyHook
@@ -50,6 +52,10 @@ class SomeObject(object):
 
 class SomeContained(SomeObject, Contained):
     """A simple annotatable contained object for tests."""
+
+
+class SomeContainedPersistent(Persistent, SomeContained):
+    pass
 
 
 class URIStub(object):

@@ -46,9 +46,6 @@ catalogs are created::
     >>> from schooltool.app.interfaces import CatalogStartUpEvent
     >>> from zope.event import notify
 
-    >>> print MyCatalog.get()
-    None
-
     >>> notify(CatalogStartUpEvent(ISchoolToolApplication(None)))
     Setting indexes for <CatalogStub 'my catalog'>
 
@@ -97,9 +94,6 @@ will be deleted::
     ...     MyCatalog, name="test-catalog-integration-mycatalog")
 
     >>> notify(CatalogStartUpEvent(ISchoolToolApplication(None)))
-
-    >>> print MyCatalog.get()
-    None
 
     >>> print sorted(ICatalogs(ISchoolToolApplication(None)))
     []

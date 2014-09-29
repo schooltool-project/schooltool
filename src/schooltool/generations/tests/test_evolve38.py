@@ -30,6 +30,8 @@ from zope.site.folder import Folder
 
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.generations.tests import ContextStub
+from schooltool.generations.tests import setUp as packageSetUp
+from schooltool.generations.tests import tearDown
 from schooltool.timetable.app import SCHEDULES_KEY
 from schooltool.timetable.app import TIMETABLES_KEY
 from schooltool.timetable.app import SchoolToolSchedules
@@ -37,19 +39,10 @@ from schooltool.timetable.schedule import Schedule, ScheduleContainer
 from schooltool.timetable.timetable import Timetable, SelectedPeriodsSchedule
 
 
-class AppStub(Folder):
-    implements(ISchoolToolApplication)
-
-    def __init__(self):
-        super(AppStub, self).__init__()
-
-
 def doctest_evolve38():
     r"""Test evolution to generation 38.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
-        >>> manager = setup.createSiteManager(app)
+        >>> context = ContextStub(app)
 
         >>> schedules = app[SCHEDULES_KEY] = SchoolToolSchedules()
         >>> timetables = app[TIMETABLES_KEY] = SchoolToolSchedules()
@@ -106,13 +99,8 @@ def doctest_evolve38():
 
 
 def setUp(test):
-    setup.placelessSetUp()
-    setup.setUpTraversal()
+    packageSetUp(test)
     setSite()
-
-def tearDown(test):
-    setSite()
-    setup.placelessTearDown()
 
 
 def test_suite():

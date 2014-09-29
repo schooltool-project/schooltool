@@ -26,6 +26,7 @@ from zope.interface.verify import verifyObject
 from zope.app.testing import setup, placelesssetup
 
 from schooltool.testing import setup as sbsetup
+from schooltool.app.tests import setUp, tearDown
 
 
 def doctest_SchoolToolApplication():
@@ -129,11 +130,14 @@ def test_suite():
     return unittest.TestSuite([
                 doctest.DocTestSuite(optionflags=doctest.ELLIPSIS),
                 doctest.DocTestSuite('schooltool.app.app',
-                                     optionflags=doctest.ELLIPSIS),
+                                     setUp=setUp, tearDown=tearDown,
+                                     optionflags=doctest.ELLIPSIS|doctest.REPORT_ONLY_FIRST_FAILURE),
                 doctest.DocTestSuite('schooltool.app.interfaces',
-                                     optionflags=doctest.ELLIPSIS),
+                                     setUp=setUp, tearDown=tearDown,
+                                     optionflags=doctest.ELLIPSIS|doctest.REPORT_ONLY_FIRST_FAILURE),
                 doctest.DocTestSuite('schooltool.app.membership',
-                                     optionflags=doctest.ELLIPSIS),
+                                     setUp=setUp, tearDown=tearDown,
+                                     optionflags=doctest.ELLIPSIS|doctest.REPORT_ONLY_FIRST_FAILURE),
            ])
 
 

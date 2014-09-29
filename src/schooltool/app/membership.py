@@ -20,11 +20,6 @@ Membership relationship.
 
 This module defines group membership as a relationship.
 
-We can reuse most of the test fixture from schooltool.relationship.tests.
-
-    >>> from schooltool.relationship.tests import setUp, tearDown
-    >>> setUp()
-
 We also need to register an event subscriber for IBeforeRelationshipEvent,
 to enforce relationship constraints.
 
@@ -36,10 +31,10 @@ We will need some sample persons and groups for the demonstration
 
     >>> from schooltool.group.group import Group
     >>> from schooltool.person.person import Person
-    >>> jonas = Person()
-    >>> petras = Person()
-    >>> developers = Group()
-    >>> admins = Group()
+    >>> jonas = persons['jonas'] = Person()
+    >>> petras = persons['petras'] = Person()
+    >>> developers = groups['developers'] = Group()
+    >>> admins = groups['admins'] = Group()
 
 You can create memberships this way:
 
@@ -104,7 +99,6 @@ Of course, these constraints do not apply to other kinds of relationships.
 That's all.
 
     >>> zope.event.subscribers[:] = old_subscribers
-    >>> tearDown()
 
 """
 
@@ -160,13 +154,14 @@ def enforceMembershipConstraints(event):
 def isTransitiveMember(obj, group):
     """Is `obj` a member of `group` (either directly or indirectly)?
 
-        >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> setUp()
-
     Suppose we have four groups, named a, b, c and d.
 
         >>> from schooltool.group.group import Group
-        >>> a, b, c, d = [Group() for n in range(4)]
+        >>> g = []
+        >>> for i in range(4):
+        ...     group = groups[str(i)] = Group()
+        ...     g.append(group)
+        >>> a, b, c, d = g
 
     A is a member of b, which is a member of c.
 
@@ -197,10 +192,6 @@ def isTransitiveMember(obj, group):
         False
         >>> isTransitiveMember(a, d)
         False
-
-    That's it.
-
-        >>> tearDown()
 
     """
     if obj is group:

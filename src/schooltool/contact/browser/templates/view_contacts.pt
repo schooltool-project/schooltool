@@ -13,7 +13,7 @@
              condition="relationships">
     <tal:block repeat="info relationships">
       <div tal:condition="info/relationship" i18n:translate="">
-        <span tal:replace="info/getRelationshipTitle" i18n:name="relationship" />
+        <span tal:replace="info/relationship" i18n:name="relationship" />
         of
         <a tal:replace="structure info/__parent__/@@link" i18n:name="person" />
       </div>

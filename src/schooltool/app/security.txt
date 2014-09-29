@@ -21,10 +21,10 @@ SchoolTool authentication utility
 
 (Handwaving...)
 
-    >>> from zope.app.testing import setup
-    >>> root = setup.placefulSetUp(True)
-    >>> from schooltool.relationship.tests import setUpRelationships
-    >>> setUpRelationships()
+    >>> from schooltool.testing.setup import getIntegrationTestZCML
+    >>> from schooltool.testing.stubs import AppStub
+    >>> zcml = getIntegrationTestZCML()
+    >>> app = AppStub()
 
 Global auth utility::
 
@@ -56,19 +56,12 @@ SchoolTool is a possible site::
     >>> from zope.interface.verify import verifyObject
     >>> from zope.component.interfaces import ISite, IPossibleSite
 
-    >>> from schooltool.app.app import SchoolToolApplication
-    >>> app = SchoolToolApplication()
     >>> verifyObject(IPossibleSite, app)
     True
     >>> verifyObject(ISite, app)
-    Traceback (most recent call last):
-    ...
-    DoesNotImplement: An object does not implement interface
-                      <InterfaceClass zope.component.interfaces.ISite>
+    True
 
     >>> from zope.component import provideAdapter
-    >>> from schooltool.app.app import getSchoolToolApplication
-    >>> provideAdapter(getSchoolToolApplication)
 
 The ``SchoolToolAuthenticationUtility`` is an ``IAuthentication`` utility that
 lives in that site::
@@ -83,7 +76,6 @@ lives in that site::
 
 Let's provide the location of auth::
 
-    >>> root['frogpond'] = app
     >>> from schooltool.app.security import setUpLocalAuth
     >>> setUpLocalAuth(app, auth)
 
@@ -143,8 +135,9 @@ raised::
 
 Let's add a group:
 
-    >>> from schooltool.group.group import Group
-    >>> group = Group()
+    >>> from schooltool.group.group import Group, GroupContainer
+    >>> groups = app['groups'] = GroupContainer()
+    >>> group = groups['group'] = Group()
     >>> group.title = "The Management"
     >>> group.__name__ = "management"
     >>> group.members.add(person)
@@ -264,7 +257,7 @@ login page:
     >>> request.response.getStatus()
     302
     >>> request.response.getHeader('Location')
-    'http://127.0.0.1/frogpond/auth/@@login.html?forbidden=yes&nexturl=http%3A//127.0.0.1'
+    'http://127.0.0.1/auth/@@login.html?forbidden=yes&nexturl=http%3A//127.0.0.1'
 
 The URL is properly escaped
 
@@ -274,7 +267,7 @@ The URL is properly escaped
     >>> request.response.getStatus()
     302
     >>> request.response.getHeader('Location')
-    'http://127.0.0.1/frogpond/auth/@@login.html?forbidden=yes&nexturl=/%2B%2Betc%2B%2Bsite'
+    'http://127.0.0.1/auth/@@login.html?forbidden=yes&nexturl=/%2B%2Betc%2B%2Bsite'
 
 GET parameters are passed along:
 
@@ -285,7 +278,7 @@ GET parameters are passed along:
     >>> request.response.getStatus()
     302
     >>> request.response.getHeader('Location')
-    'http://127.0.0.1/frogpond/auth/@@login.html?forbidden=yes&nexturl=/%2B%2Betc%2B%2Bsite%3Ffoo%3D10%26bar%3D20'
+    'http://127.0.0.1/auth/@@login.html?forbidden=yes&nexturl=/%2B%2Betc%2B%2Bsite%3Ffoo%3D10%26bar%3D20'
 
 However it does that only for regular browser requests.  Other kinds of
 requests issue the default challenge by setting the response code to 401
@@ -323,4 +316,7 @@ authentication challenge.
 
 .. Tear down::
 
+    >>> from zope.app.testing import setup
+    >>> from transaction import abort
     >>> setup.placefulTearDown()
+    >>> abort()

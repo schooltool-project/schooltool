@@ -28,14 +28,14 @@ from zope.annotation.interfaces import IAnnotations
 from schooltool.relationship.relationship import LinkSet
 
 
-def getRelationshipLinks(context):
+def getRelationshipLinks(context, factory=LinkSet):
     """Adapt an IAnnotatable object to IRelationshipLinks."""
     annotations = IAnnotations(context)
     key = 'schooltool.relationship.RelationshipLinks'
     try:
         return annotations[key]
     except KeyError:
-        annotations[key] = LinkSet()
+        annotations[key] = factory()
         annotations[key].__parent__ = context
         annotations[key].__name__ = "relationships"
         return annotations[key]

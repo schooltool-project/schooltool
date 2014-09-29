@@ -156,17 +156,16 @@ It's possible to edit the limited fields:
     ...     print row.get_attribute('id')
     form-widgets-ID-row
     form-widgets-placeofbirth-row
+    form-widgets-leave_date-row
+    form-widgets-leave_reason-row
+    form-widgets-leave_destination-row
     form-widgets-student_id-row
     form-widgets-chess_player-row
 
 If we remove Tom from the Teachers group, we still see his old
 demographics fields, even the limited to Teachers:
 
-    >>> manager.query.link('School').click()
-    >>> manager.query.link('Teachers').click()
-    >>> sel = '//a[@title="Edit members for this group"]'
-    >>> manager.query.xpath(sel).click()
-    >>> manager.query.name('remove_item.tom').click()
+    >>> manager.ui.group.members.remove('2012', 'Teachers', ['tom'])
 
     >>> manager.query.link('School').click()
     >>> manager.query.link('People').click()
@@ -191,11 +190,7 @@ But it's not possible to edit the limited fields anymore:
 
 Same with students. Let's remove Nestor from the Students group:
 
-    >>> manager.query.link('School').click()
-    >>> manager.query.link('Students').click()
-    >>> sel = '//a[@title="Edit members for this group"]'
-    >>> manager.query.xpath(sel).click()
-    >>> manager.query.name('remove_item.nestor').click()
+    >>> manager.ui.group.members.remove('2012', 'Students', ['nestor'])
 
     >>> manager.query.link('School').click()
     >>> manager.query.link('People').click()

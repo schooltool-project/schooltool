@@ -23,13 +23,16 @@ Tests for group views.
 import unittest
 import doctest
 
+from zope.app.testing.setup import placefulSetUp
 from zope.interface import directlyProvides
+from zope.container.btree import BTreeContainer
 from zope.publisher.browser import TestRequest
 from zope.traversing.interfaces import IContainmentRoot
 from zope.component import provideAdapter
 
-from schooltool.app.browser.testing import setUp, tearDown
+from schooltool.app.browser.testing import tearDown
 from schooltool.testing import setup
+from schooltool.testing.stubs import AppStub
 
 
 def doctest_GroupListView():
@@ -43,7 +46,6 @@ def doctest_GroupListView():
 
     One requirement: the person has to know where he is.
 
-        >>> app = setup.setUpSchoolToolSite()
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> provideAdapter(lambda context: app, (None,), ISchoolToolApplication)
         >>> app['persons']['ignas'] = person
@@ -55,7 +57,7 @@ def doctest_GroupListView():
         >>> from schooltool.group.group import GroupContainer
         >>> from zope.component import provideAdapter
         >>> from schooltool.group.interfaces import IGroupContainer
-        >>> gc = GroupContainer()
+        >>> gc = app['groups'] = GroupContainer()
         >>> provideAdapter(lambda x: gc, adapts=[None], provides=IGroupContainer)
         >>> world = gc['the_world'] = Group("Others")
         >>> etria = gc['etria'] = Group("Etria")
@@ -158,7 +160,6 @@ def doctest_MemberListView():
 
     We need these objects to live in an application:
 
-        >>> app = setup.setUpSchoolToolSite()
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> provideAdapter(lambda context: app, (None,), ISchoolToolApplication)
 
@@ -270,16 +271,21 @@ def doctest_GroupView():
 
         >>> from schooltool.group.browser.group import GroupView
         >>> from schooltool.group.group import Group
-        >>> group = Group()
+        >>> groups = app['groups'] = BTreeContainer()
+        >>> group = groups['group'] = Group()
         >>> request = TestRequest()
         >>> view = GroupView(group, request)
 
     Let's relate some objects to our group:
 
         >>> from schooltool.person.person import Person
-        >>> group.members.add(Person(title='First'))
-        >>> group.members.add(Person(title='Last'))
-        >>> group.members.add(Person(title='Intermediate'))
+        >>> persons = app['persons']
+        >>> first = persons['first'] = Person(title='First')
+        >>> last = persons['last'] = Person(title='Last')
+        >>> intermediate = persons['inter'] = Person(title='Intermediate')
+        >>> group.members.add(first)
+        >>> group.members.add(last)
+        >>> group.members.add(intermediate)
 
     Only persons whose title we can see are in the list, so we must
     define an all alowing security checker:
@@ -459,7 +465,7 @@ def doctest_GroupCSVImporter():
 
         >>> from schooltool.group.browser.csvimport import GroupCSVImporter
         >>> from schooltool.group.group import GroupContainer
-        >>> container = GroupContainer()
+        >>> container = app['groups'] = GroupContainer()
         >>> importer = GroupCSVImporter(container, None)
 
     Import some sample data
@@ -492,7 +498,7 @@ def doctest_GroupCSVImportView():
         ...     GroupCSVImportView
         >>> from schooltool.group.group import GroupContainer
         >>> from zope.publisher.browser import TestRequest
-        >>> container = GroupContainer()
+        >>> container = app['groups'] = GroupContainer()
         >>> request = TestRequest()
 
     Now we'll try a text import.  Note that the description is not required
@@ -534,7 +540,7 @@ def doctest_GroupMemberCSVImporter():
 
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> from schooltool.person.person import Person
-        >>> school = setup.setUpSchoolToolSite()
+        >>> school = app
         >>> provideAdapter(lambda context: school, (None,), ISchoolToolApplication)
         >>> persons = school['persons']
         >>> directlyProvides(school, IContainmentRoot)
@@ -552,7 +558,8 @@ def doctest_GroupMemberCSVImporter():
 
         >>> from schooltool.group.browser.csvimport import GroupMemberCSVImporter
         >>> from schooltool.group.group import Group
-        >>> group = Group('Group title', 'Group description')
+        >>> groups = app['groups'] = BTreeContainer()
+        >>> group = groups['g1'] = Group('Group title', 'Group description')
         >>> [person.username for person in group.members]
         []
         >>> importer = GroupMemberCSVImporter(group, None)
@@ -577,7 +584,7 @@ def doctest_GroupMemberCSVImporter():
 
     Create another group and another importer
 
-        >>> another_group = Group('Another group', 'Another description')
+        >>> another_group = groups['g2'] = Group('Another group', 'Another description')
         >>> [person.username for person in another_group.members]
         []
         >>> another_importer = GroupMemberCSVImporter(another_group, None)
@@ -611,7 +618,7 @@ def doctest_GroupMemberCSVImportView():
         >>> from zope.i18n import translate
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> from schooltool.person.person import Person
-        >>> school = setup.setUpSchoolToolSite()
+        >>> school = app
         >>> provideAdapter(lambda context: school, (None,), ISchoolToolApplication)
         >>> persons = school['persons']
         >>> directlyProvides(school, IContainmentRoot)
@@ -625,7 +632,8 @@ def doctest_GroupMemberCSVImportView():
         ...      GroupMemberCSVImportView
         >>> from schooltool.group.group import Group
         >>> from zope.publisher.browser import TestRequest
-        >>> group = Group('Group title', 'Group description')
+        >>> groups = app['groups'] = BTreeContainer()
+        >>> group = groups['g1'] = Group('Group title', 'Group description')
         >>> request = TestRequest()
 
     Now we'll try a text import.
@@ -699,7 +707,7 @@ def doctest_GroupsViewlet():
         >>> from schooltool.group.browser.group import GroupsViewlet
         >>> from schooltool.person.person import Person
 
-        >>> school = setup.setUpSchoolToolSite()
+        >>> school = app
         >>> persons = school['persons']
         >>> persons['student'] = student = Person("Student")
 
@@ -715,7 +723,7 @@ def doctest_GroupsViewlet():
     We want to display the generic groups a person is part of that aren't
     sections so we have a filter in the view:
 
-        >>> groups = GroupContainer()
+        >>> groups = app['groups'] = GroupContainer()
         >>> groups['tenth'] = tenth_grade = Group(title="Tenth Grade")
         >>> tenth_grade.members.add(student)
         >>> groups['team'] = team = Group(title="Sports Team")
@@ -730,6 +738,16 @@ def doctest_GroupsViewlet():
         Tenth Grade
 
     """
+
+
+def setUp(test):
+    placefulSetUp()
+    setup.getIntegrationTestZCML()
+    app = AppStub()
+    app['persons'] = BTreeContainer()
+    test.globs.update({
+        'app': app,
+    })
 
 
 def test_suite():

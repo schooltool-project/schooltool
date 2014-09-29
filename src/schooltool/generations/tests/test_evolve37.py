@@ -26,6 +26,7 @@ from persistent.interfaces import IPersistent
 from zope.app.testing import setup
 from zope.component import provideUtility
 from zope.component import provideAdapter
+from zope.component import getUtility
 from zope.interface import implements
 from zope.intid import IntIds
 from zope.intid.interfaces import IIntIds
@@ -34,7 +35,8 @@ from zope.site.folder import Folder
 from zope.component.hooks import getSite, setSite
 
 from schooltool.app.interfaces import ISchoolToolApplication
-from schooltool.generations.tests import ContextStub, StupidKeyReference
+from schooltool.generations.tests import ContextStub
+from schooltool.generations.tests import tearDown
 
 from schooltool.schoolyear.schoolyear import SchoolYear
 from schooltool.schoolyear.schoolyear import SchoolYearInit
@@ -42,33 +44,18 @@ from schooltool.schoolyear.schoolyear import SchoolYearDateRangeAdapter
 from schooltool.schoolyear.schoolyear import getSchoolYearContainer
 from schooltool.generations.evolve37 import LEVELS_APP_KEY
 from schooltool.generations.evolve37 import LevelContainerContainer
+from schooltool.testing.setup import getIntegrationTestZCML
+from schooltool.testing.stubs import AppStub
 
 
-class AppStub(Folder):
-    implements(ISchoolToolApplication)
-
-    def __init__(self):
-        super(AppStub, self).__init__()
-
-
-def provideAdapters(int_ids):
-    provideAdapter(SchoolYearDateRangeAdapter)
-    provideAdapter(getSchoolYearContainer)
-    provideUtility(int_ids, IIntIds)
-    provideAdapter(StupidKeyReference, [IPersistent], IKeyReference)
-
-
-def setUpYears(app, int_ids):
-    SchoolYearInit(app)()
+def populate(app):
     years = getSchoolYearContainer(app)
     years['1'] = SchoolYear('2010',
                             datetime.date(2010, 01, 01),
                             datetime.date(2010, 12, 30))
-    int_ids.register(years['1'])
     years['2'] = SchoolYear('2011',
                             datetime.date(2011, 01, 01),
                             datetime.date(2011, 12, 30))
-    int_ids.register(years['2'])
     years._active_id = None
     return years
 
@@ -76,11 +63,7 @@ def setUpYears(app, int_ids):
 def doctest_guessMostRecentLevels():
     """Tests for guessing the best level container.
 
-        >>> int_ids = IntIds()
-        >>> app = AppStub()
-        >>> provideAdapters(int_ids)
-
-        >>> years = setUpYears(app, int_ids)
+        >>> years = getSchoolYearContainer(app)
 
         >>> from schooltool.generations.evolve37 import guessMostRecentLevels
 
@@ -92,6 +75,7 @@ def doctest_guessMostRecentLevels():
         >>> print guessMostRecentLevels(app)
         None
 
+        >>> int_ids = getUtility(IIntIds)
         >>> app[LEVELS_APP_KEY][unicode(int_ids.getId(years['1']))] = 'levels 1'
         >>> app[LEVELS_APP_KEY][unicode(int_ids.getId(years['2']))] = 'levels 2'
 
@@ -112,17 +96,12 @@ def doctest_guessMostRecentLevels():
 def doctest_evolve37():
     """Test evolution to generation 37.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
+        >>> context = ContextStub(app)
 
-        >>> manager = setup.createSiteManager(app)
-
-        >>> int_ids = IntIds()
-        >>> provideAdapters(int_ids)
-
-        >>> years = setUpYears(app, int_ids)
+        >>> years = getSchoolYearContainer(app)
         >>> years.activateNextSchoolYear(year_id='2')
 
+        >>> int_ids = getUtility(IIntIds)
         >>> app[LEVELS_APP_KEY] = LevelContainerContainer()
         >>> app[LEVELS_APP_KEY][unicode(int_ids.getId(years['1']))] = 'levels 1'
         >>> app[LEVELS_APP_KEY][unicode(int_ids.getId(years['2']))] = 'levels 2'
@@ -146,15 +125,9 @@ def doctest_evolve37():
 def doctest_evolve37_no_levels():
     """Test evolution to generation 37.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
+        >>> context = ContextStub(app)
 
-        >>> manager = setup.createSiteManager(app)
-
-        >>> int_ids = IntIds()
-        >>> provideAdapters(int_ids)
-
-        >>> years = setUpYears(app, int_ids)
+        >>> years = getSchoolYearContainer(app)
         >>> years.activateNextSchoolYear(year_id='2')
 
     Let's evolve now.
@@ -169,13 +142,16 @@ def doctest_evolve37_no_levels():
 
 
 def setUp(test):
-    setup.placelessSetUp()
-    setup.setUpTraversal()
+    setup.placefulSetUp()
+    zcml = getIntegrationTestZCML()
+    zcml.include('schooltool.schoolyear', file='schoolyear.zcml')
+    app = AppStub()
+    populate(app)
+    test.globs.update({
+        'app': app,
+        'zcml': zcml,
+    })
     setSite()
-
-def tearDown(test):
-    setSite()
-    setup.placelessTearDown()
 
 
 def test_suite():

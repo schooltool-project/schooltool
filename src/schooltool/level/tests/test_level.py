@@ -20,43 +20,32 @@ Unit tests for levels.
 """
 import unittest
 import doctest
+from persistent import Persistent
+from transaction import abort
 
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.app.testing import setup
+from zope.container.btree import BTreeContainer
+from zope.container.contained import Contained
 from zope.interface import implements, Interface
 from zope.interface.verify import verifyObject
 from zope.location.pickling import LocationCopyHook
 from zope.component import provideAdapter
-from zope.component.hooks import getSite, setSite
-from zope.site import SiteManagerContainer
-from zope.site.folder import rootFolder
+from zope.component.hooks import getSite
 
-from schooltool.testing.setup import ZCMLWrapper
 from schooltool.app.interfaces import ISchoolToolApplication
-from schooltool.relationship.tests import setUpRelationships
 from schooltool.relationship.relationship import getRelatedObjects
 from schooltool.level.level import URILevelCourses, URILevel
+from schooltool.testing.setup import getIntegrationTestZCML
+from schooltool.testing.stubs import AppStub
 
 
-class AppStub(dict, SiteManagerContainer):
-    implements(ISchoolToolApplication)
-
-
-class CourseStub(object):
+class CourseStub(Persistent, Contained):
     implements(IAttributeAnnotatable)
     def __init__(self, title):
         self.title = unicode(title)
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.title)
-
-
-def provideApplicationStub():
-    app = AppStub()
-    provideAdapter(
-        lambda ignored: app,
-        adapts=(None,),
-        provides=ISchoolToolApplication)
-    return app
 
 
 def doctest_LevelContainer():
@@ -67,7 +56,7 @@ def doctest_LevelContainer():
 
     A simple ordered container of levels.
 
-        >>> level_container = LevelContainer()
+        >>> level_container = app['schooltool.level.level']
         >>> verifyObject(ILevelContainer, level_container)
         True
 
@@ -97,7 +86,8 @@ def doctest_Level():
 
     Level is a very simple object.
 
-        >>> level = Level(u'1')
+        >>> levels = app['schooltool.level.level']
+        >>> level = levels['1'] = Level(u'1')
         >>> verifyObject(ILevel, level)
         True
 
@@ -106,10 +96,10 @@ def doctest_Level():
 
     It has a courses attribute to control which courses are taught this level.
 
-        >>> course1 = CourseStub('C1')
+        >>> courses = app['schooltool.course.course']
+        >>> course1 = courses['c1'] = CourseStub('C1')
+        >>> course2 = courses['c2'] = CourseStub('C2')
         >>> level.courses.add(course1)
-
-        >>> course2 = CourseStub('C2')
         >>> level.courses.add(course2)
 
         >>> print sorted(level.courses, key=lambda l: l.title)
@@ -129,6 +119,8 @@ def doctest_Level():
 def doctest_LevelVocabulary():
     """Tests for LevelVocabulary.
 
+        >>> from schooltool.level.interfaces import ILevelContainer
+
     Vocabulary of levels:
 
         >>> from zope.schema.interfaces import IVocabularyTokenized
@@ -146,6 +138,10 @@ def doctest_LevelVocabulary():
     If the ISchoolToolApplication object cannot be adapted to
     ILevelContainer, the vocabulary is empty:
 
+        >>> provideAdapter(
+        ...     lambda ignored: None,
+        ...     (ISchoolToolApplication,),
+        ...     ILevelContainer)
         >>> vocabulary.container
         {}
 
@@ -176,7 +172,7 @@ def doctest_LevelVocabulary():
         >>> from schooltool.level.interfaces import ILevelContainer
         >>> from schooltool.level.level import LevelContainer
 
-        >>> levels = LevelContainer()
+        >>> levels = app['schooltool.level.level']
         >>> levels['basic'] = Level(u'Basic')
         >>> levels['advanced'] = Level(u'Advanced')
 
@@ -215,12 +211,29 @@ def doctest_LevelVocabulary():
 
 def setUp(test):
     setup.placefulSetUp()
-    setUpRelationships()
-    provideApplicationStub()
+    # Workaround: _clear actually sets the Zope's vocabulary registry and
+    #             is called on zope.app.schema.vocabularies import (during
+    #             zcml parsing, for example).  When running multiple tests
+    #             this ingenious idea fails, so we call it manually.
+    from zope.app.schema import vocabulary
+    vocabulary._clear()
+    zcml = getIntegrationTestZCML()
+    zcml.include('schooltool.level', file='level.zcml')
+    provideAdapter(LocationCopyHook)
+    app = AppStub()
+    app['schooltool.course.course'] = BTreeContainer()
+    test.globs.update({
+        'CourseStub': CourseStub,
+        'getRelatedObjects': getRelatedObjects,
+        'provideAdapter': provideStubAdapter,
+        'unregisterAdapter': unregisterStubAdapter,
+        'app': app,
+        })
 
 
 def tearDown(test):
     setup.placefulTearDown()
+    abort()
 
 
 def provideStubAdapter(factory, adapts=None, provides=None, name=u''):
@@ -233,57 +246,6 @@ def unregisterStubAdapter(factory, adapts=None, provides=None, name=u''):
     sm.unregisterAdapter(factory, required=adapts, provided=provides, name=name)
 
 
-def setUpIntegration(test):
-    setup.placefulSetUp()
-    # Workaround: _clear actually sets the Zope's vocabulary registry and
-    #             is called on zope.app.schema.vocabularies import (during
-    #             zcml parsing, for example).  When running multiple tests
-    #             this ingenious idea fails, so we call it manually.
-    from zope.app.schema import vocabulary
-    vocabulary._clear()
-
-    zcml = ZCMLWrapper()
-    zcml.setUp(
-        namespaces={"": "http://namespaces.zope.org/zope"},
-        i18n_domain='schooltool')
-    zcml.include('schooltool.common', file='zcmlfiles.zcml')
-    # We define the default pemissions here, because though widely used,
-    # they are currently mangled with other stuff in schooltool.common
-    zcml.string('''
-      <permission id="schooltool.view" title="View" />
-      <permission id="schooltool.edit" title="Edit Info" />
-    ''')
-
-    zcml.include('zope.intid')
-    zcml.string('''
-      <utility
-        factory="zope.intid.IntIds"
-        provides="zope.intid.interfaces.IIntIds"
-      />
-      <adapter
-          for="persistent.interfaces.IPersistent"
-          factory="schooltool.testing.stubs.KeyReferenceStub"
-          trusted="y"
-          />
-    ''')
-
-    zcml.include('schooltool.level', file='level.zcml')
-    zcml.include('schooltool.schoolyear', file='schoolyear.zcml')
-    zcml.include('schooltool.relationship', file='relationship.zcml')
-    provideAdapter(LocationCopyHook)
-
-    root = rootFolder()
-    root['app'] = provideApplicationStub()
-    setup.createSiteManager(root['app'], setsite=True)
-    test.globs.update({
-        'zcml': zcml,
-        'CourseStub': CourseStub,
-        'getRelatedObjects': getRelatedObjects,
-        'provideAdapter': provideStubAdapter,
-        'unregisterAdapter': unregisterStubAdapter,
-        })
-
-
 def test_suite():
     optionflags = (doctest.NORMALIZE_WHITESPACE |
                    doctest.ELLIPSIS |
@@ -293,12 +255,10 @@ def test_suite():
                              optionflags=optionflags),
         doctest.DocFileSuite(
             'level-integration.txt',
-            setUp=setUpIntegration, tearDown=tearDown,
+            setUp=setUp, tearDown=tearDown,
             optionflags=optionflags),
            ])
 
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
-
-

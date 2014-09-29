@@ -20,24 +20,17 @@ Calendar overlays.
 
 This module defines relationships used to store calendar subscriptions.
 
-    >>> from zope.app.testing import setup
-    >>> setup.placelessSetUp()
-    >>> setup.setUpAnnotations()
-
     >>> from schooltool.testing import setup as sbsetup
     >>> sbsetup.setUpCalendaring()
-
-    >>> from schooltool.relationship.tests import setUpRelationships
-    >>> setUpRelationships()
 
 We will need some sample persons and groups for the demonstration
 
     >>> from schooltool.group.group import Group
     >>> from schooltool.person.person import Person
-    >>> john = Person(title="John")
-    >>> smith = Person(title="Smith")
-    >>> developers = Group(title="Developers")
-    >>> admins = Group(title="Admins")
+    >>> john = persons['john'] = Person(title="John")
+    >>> smith = persons['smith'] = Person(title="Smith")
+    >>> developers = groups['developers'] = Group(title="Developers")
+    >>> admins = groups['admins'] = Group(title="Admins")
 
 Let's say John wants to see the calendars of Smith and the Developers group
 overlaid on his own calendar
@@ -71,10 +64,6 @@ However, 'in' checks for the presence of a calendar
     True
     >>> ISchoolToolCalendar(Person(title="Newcomer")) in john.overlaid_calendars
     False
-
-Clean up
-
-    >>> setup.placelessTearDown()
 
 """
 
@@ -218,15 +207,14 @@ class BoundOverlaidCalendarsProperty(BoundRelationshipProperty):
 
     Stores the list of overlaid calendars in relationships.
 
-        >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> from schooltool.relationship.tests import SomeObject
+        >>> from schooltool.relationship.tests import SomeContainedPersistent
         >>> from schooltool.relationship import getRelatedObjects
-        >>> setUp()
 
     Given a relatable object, and a relatable calendar
 
-        >>> a = SomeObject('a')
-        >>> cal = SomeObject('cal')
+        >>> container = app['persons']
+        >>> a = container['a'] = SomeContainedPersistent('a')
+        >>> cal = container['b'] = SomeContainedPersistent('cal')
 
     we can create a BoundOverlaidCalendarsProperty
 
@@ -271,10 +259,6 @@ class BoundOverlaidCalendarsProperty(BoundRelationshipProperty):
         >>> for item in overlaid_calendars:
         ...     print item.calendar, item.show, item.color1, item.color2
         cal False red green
-
-    We're done.
-
-        >>> tearDown()
 
     """
 
@@ -394,10 +378,7 @@ def choose_color(colors, used_colors):
 def unrelateCalendarOnDeletion(event):
     """When you delete an object, relationships of it's calendar should be removed
 
-        >>> from schooltool.relationship.tests import setUp, tearDown
         >>> from schooltool.testing.setup import setUpCalendaring
-
-        >>> setUp()
         >>> setUpCalendaring()
 
         >>> import zope.event
@@ -409,9 +390,8 @@ def unrelateCalendarOnDeletion(event):
     We will need some object that implements IHaveCalendar for that:
 
         >>> from zope.container.btree import BTreeContainer
-        >>> container = BTreeContainer()
         >>> from schooltool.person.person import Person
-        >>> container = BTreeContainer()
+        >>> container = persons
         >>> container['jonas'] = jonas = Person(username="Jonas")
         >>> container['petras'] = petras =  Person(username="Petras")
 
@@ -431,7 +411,6 @@ def unrelateCalendarOnDeletion(event):
     Restore old subscribers:
 
         >>> zope.event.subscribers[:] = old_subscribers
-        >>> tearDown()
 
     """
     if not IObjectRemovedEvent.providedBy(event):

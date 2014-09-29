@@ -20,8 +20,13 @@ Unit tests for basic person security.
 """
 import unittest
 import doctest
+from transaction import abort
 
-from schooltool.relationship.tests import setUp, tearDown
+from zope.app.testing import setup
+from zope.container.btree import BTreeContainer
+
+from schooltool.testing.setup import getIntegrationTestZCML
+from schooltool.testing.stubs import AppStub
 
 
 def doctest_PersonAdvisorsCrowd():
@@ -30,9 +35,10 @@ def doctest_PersonAdvisorsCrowd():
     We'll create an advisor and two students.
 
         >>> from schooltool.basicperson.person import BasicPerson
-        >>> student1 = BasicPerson("student", "Student", "One")
-        >>> student2 = BasicPerson("student", "Student", "Two")
-        >>> advisor = BasicPerson("advisor", "Advisor", "One")
+        >>> persons = app['persons']
+        >>> student1 = persons['1'] = BasicPerson("student", "Student", "One")
+        >>> student2 = persons['2'] = BasicPerson("student", "Student", "Two")
+        >>> advisor = persons['3'] = BasicPerson("advisor", "Advisor", "One")
 
     The advisor will only advise the first student.
 
@@ -48,6 +54,22 @@ def doctest_PersonAdvisorsCrowd():
         False
 
     """
+
+
+def setUp(test):
+    setup.placefulSetUp()
+    zcml = getIntegrationTestZCML()
+    zcml.include('schooltool.schoolyear', file='schoolyear.zcml')
+    app = AppStub()
+    app['persons'] = BTreeContainer()
+    test.globs.update({
+        'app': app,
+    })
+
+
+def tearDown(test):
+    setup.placefulTearDown()
+    abort()
 
 
 def test_suite():

@@ -178,8 +178,8 @@ def doctest_format_courses():
         >>> setUpSchool(app)
         >>> exporter = MegaExporter(app, None)
         >>> for row in exporter.format_courses(): print row
-        [Header('School Year'), Header('ID'), Header('Title'), Header('Description'), Header('Local ID'), Header('Government ID'), Header('Credits')]
-        [Text(u'2005'), Text(u'c1'), Text('History'), Text(None), Text(None), Text(None), Text(None)]
+        [Header('School Year'), Header('ID'), Header('Title'), Header('Description'), Header('Local ID'), Header('Government ID'), Header('Credits'), Header('Grade Level ID')]
+        [Text(u'2005'), Text(u'c1'), Text('History'), Text(None), Text(None), Text(None), Text(None), Text(None)]
     """
 
 
@@ -204,7 +204,10 @@ def doctest_format_persons():
          Header(u'Ethnicity'),
          Header(u'Language'),
          Header(u'Place of birth'),
-         Header(u'Citizenship')]
+         Header(u'Citizenship'),
+         Header(u'Date of un-enrollment'),
+         Header(u'Reason for un-enrollment'),
+         Header(u'Destination school')]
         [Text(u'john'),
          Text(None),
          Text('John'),
@@ -219,7 +222,10 @@ def doctest_format_persons():
          Text(u'Asian'),
          Text('English'),
          Text('Humptington'),
-         Text('US')]
+         Text('US'),
+         Date(None),
+         Text(None),
+         Text(None)]
         [Text(u'manager'),
          Text(None),
          Text('Default'),
@@ -233,6 +239,9 @@ def doctest_format_persons():
          Text(None),
          Text(None),
          Text(None),
+         Text(None),
+         Text(None),
+         Date(None),
          Text(None),
          Text(None)]
         [Text(u'pete'),
@@ -249,7 +258,10 @@ def doctest_format_persons():
          Text(u'White'),
          Text('Brittish'),
          Text('Providence'),
-         Text('UK')]
+         Text('UK'),
+         Date(None),
+         Text(None),
+         Text(None)]
         [Text(u'teacher'),
          Text(None),
          Text('Mister'),
@@ -263,6 +275,9 @@ def doctest_format_persons():
          Text(None),
          Text(None),
          Text(None),
+         Text(None),
+         Text(None),
+         Date(None),
          Text(None),
          Text(None)]
     """

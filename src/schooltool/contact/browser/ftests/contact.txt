@@ -108,7 +108,7 @@ We can add contacts directly to persons:
     >>> browser.getControl('Email').value = 'peter@example.com'
 
     >>> relationship = browser.getControl('Relationship')
-    >>> relationship.value = ['parent']
+    >>> relationship.value = ['p-']
 
     >>> browser.getControl('Add').click()
 
@@ -144,6 +144,7 @@ Both contacts should be assigned now:
           <a href="http://localhost/contacts/Contact">John</a>
         </td>
         <td>
+          Contact
         </td>
     </tr>
     <tr class="even"><td>
@@ -189,7 +190,7 @@ We can see them in the overview page also.
       <div>
       <div class="person-info">
         <fieldset><div class="person-info">
-          <h2> Mr John J Manager Jr </h2>
+          <h2> Contact, Mr John J Manager Jr </h2>
           <a href="http://localhost/contacts/Contact">(View Details)</a>
           <div class="info-block">
             <h4>Address</h4>
@@ -249,7 +250,7 @@ Let's change the relationship with Bill.
     >>> browser.getLink('Edit').click()
 
     >>> relationship = browser.getControl('Relationship', index=1)
-    >>> relationship.value = ['parent']
+    >>> relationship.value = ['p-']
     >>> browser.getControl('Apply').click()
 
     >>> browser.getLink('View').click()
@@ -405,7 +406,7 @@ And assign Default Manager user as contact of a student.
     </h2>
     <a href="http://localhost/contacts/Contact">(View Details)</a>
     <h2>
-      Default Manager
+      Contact, Default Manager
     </h2>
     <a href="http://localhost/persons/manager/contact">(View Details)</a>
 
@@ -427,7 +428,7 @@ And of course we can change Manager's relationship with Bill.
 
     >>> browser.getLink('Edit').click()
     >>> relationship = browser.getControl('Relationship')
-    >>> relationship.value = ['sibling']
+    >>> relationship.value = ['s-']
     >>> browser.getControl('Apply').click()
 
     >>> browser.getLink('View').click()

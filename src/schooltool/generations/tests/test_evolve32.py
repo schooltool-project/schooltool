@@ -28,20 +28,17 @@ from zope.container import btree
 
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.generations.tests import ContextStub
+from schooltool.generations.tests import setUp
+from schooltool.generations.tests import tearDown
 import schooltool.basicperson.interfaces
 import schooltool.basicperson.demographics
 from schooltool import basicperson
 
 
-class AppStub(btree.BTreeContainer):
-    implements(ISchoolToolApplication)
-
-
 def doctest_evolve32():
     """Evolution to generation 32.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
+        >>> context = ContextStub(app)
 
     Create demographics with the typo (assume that user deleted or otherwise
     modified some of the demographics).
@@ -74,14 +71,6 @@ def doctest_evolve32():
          u'Asian']
 
     """
-
-
-def setUp(test):
-    setup.placelessSetUp()
-    setup.setUpAnnotations()
-
-def tearDown(test):
-    setup.placelessTearDown()
 
 
 def test_suite():

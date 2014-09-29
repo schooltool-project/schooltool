@@ -20,34 +20,28 @@ Unit tests for schooltool.generations.evolve29
 """
 import unittest
 import doctest
+from persistent import Persistent
 
-from zope.app.testing import setup
-from zope.interface import implements
+from zope.container.btree import BTreeContainer
 
-from schooltool.basicperson.person import BasicPerson
 from schooltool.generations.tests import ContextStub
-from schooltool.app.interfaces import ISchoolToolApplication
+from schooltool.generations.tests import setUp as packageSetUp
+from schooltool.generations.tests import tearDown
 
 
-class AppStub(dict):
-    implements(ISchoolToolApplication)
 
-    def __init__(self):
-        self['persons'] = {}
-        self['persons']['john'] = BasicPerson("john", "Johny", "John")
-        self['persons']['john'].email = "john@example.com"
-        self['persons']['john'].phone = "667755"
+class PersonStub(Persistent):
 
-        self['persons']['pete'] = BasicPerson("pete", "Petey", "Pete")
-        self['persons']['pete'].email = "pete@example.com"
-        self['persons']['pete'].phone = "667755"
+    def __init__(self, username, first_name, last_name):
+        self.username = username
+        self.first_name = first_name
+        self.last_name = last_name
 
 
 def doctest_evolve29():
     """Evolution to generation 29.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
+        >>> context = ContextStub(app)
 
     We set up some persons and evolve the application
 
@@ -64,18 +58,29 @@ def doctest_evolve29():
     """
 
 
+def populate(app):
+    app['persons'] = BTreeContainer()
+    app['persons']['john'] = PersonStub("john", "Johny", "John")
+    app['persons']['john'].email = "john@example.com"
+    app['persons']['john'].phone = "667755"
+
+    app['persons']['pete'] = PersonStub("pete", "Petey", "Pete")
+    app['persons']['pete'].email = "pete@example.com"
+    app['persons']['pete'].phone = "667755"
+    app['persons']['pete'].gradeclass = 'gradeclass'
+
+
 def setUp(test):
-    setup.placelessSetUp()
-
-
-def tearDown(test):
-    setup.placelessTearDown()
+    packageSetUp(test)
+    populate(test.globs['app'])
 
 
 def test_suite():
-    return doctest.DocTestSuite(setUp=setUp, tearDown=tearDown,
-                                optionflags=doctest.ELLIPSIS
-                                |doctest.REPORT_ONLY_FIRST_FAILURE)
+    return unittest.TestSuite([
+        doctest.DocTestSuite(setUp=setUp, tearDown=tearDown,
+                             optionflags=doctest.ELLIPSIS
+                             |doctest.REPORT_ONLY_FIRST_FAILURE)
+        ])
 
 
 if __name__ == '__main__':

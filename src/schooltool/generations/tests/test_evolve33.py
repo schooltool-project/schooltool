@@ -27,13 +27,14 @@ from zope.component import provideUtility
 from zope.component import provideAdapter
 from zope.interface import implements
 from zope.intid import IntIds
-from zope.intid.interfaces import IIntIds
 from zope.site.folder import Folder
 from zope.container.btree import BTreeContainer
 from zope.component.hooks import getSite, setSite
 
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.generations.tests import ContextStub
+from schooltool.generations.tests import setUp as packageSetUp
+from schooltool.generations.tests import tearDown
 from schooltool.contact.basicperson import getBoundContact
 from schooltool.contact.interfaces import IContact
 from schooltool.contact.interfaces import IUniqueFormKey
@@ -41,14 +42,10 @@ from schooltool.basicperson.interfaces import IBasicPerson
 from schooltool.basicperson.person import BasicPerson
 
 
-class AppStub(Folder):
-    implements(ISchoolToolApplication)
-
-    def __init__(self):
-        super(AppStub, self).__init__()
-        self['persons'] = BTreeContainer()
-        self['persons']['john'] = BasicPerson("john", "Johny", "John")
-        self['persons']['pete'] = BasicPerson("pete", "Petey", "Pete")
+def populate(app):
+    app['persons'] = BTreeContainer()
+    app['persons']['john'] = BasicPerson("john", "Johny", "John")
+    app['persons']['pete'] = BasicPerson("pete", "Petey", "Pete")
 
 
 def verboseGetBoundContact(context):
@@ -60,9 +57,9 @@ def verboseGetBoundContact(context):
 def doctest_evolve33():
     """Test evolution to generation 33.
 
-    We'll need int ids.
+    Set initial site:
 
-        >>> provideUtility(IntIds(), IIntIds)
+        >>> setSite(None)
 
     Also an adapter to obtain the contact, and adapter to create form keys.
 
@@ -71,8 +68,7 @@ def doctest_evolve33():
 
     And of course the app.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
+        >>> context = ContextStub(app)
         >>> manager = setup.createSiteManager(app)
 
     Let's evolve now.  Note that persons get adapted to IContact.
@@ -90,18 +86,10 @@ def doctest_evolve33():
     """
 
 
-from schooltool.generations.tests import catalogSetUp, catalogTearDown
-
-
 def setUp(test):
-    catalogSetUp(test)
-    setup.setUpDependable()
-    setSite()
-
-def tearDown(test):
-    setSite()
-    catalogTearDown(test)
-
+    packageSetUp(test)
+    populate(test.globs['app'])
+    
 
 def test_suite():
     optionflags = (doctest.ELLIPSIS |

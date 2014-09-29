@@ -66,7 +66,7 @@ class IURIObject(Interface):
     def __ne__(other):
         """self != other"""
 
-    def __sh__(self):
+    def __hash__():
         """Hash self (for example, return hash of uri)"""
 
     def access(state):

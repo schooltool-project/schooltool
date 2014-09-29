@@ -3,14 +3,14 @@ Selenium browser export test example
 
     >>> manager = browsers.manager
     >>> manager.ui.login('manager', 'schooltool')
+    >>> manager.ui.schoolyear.add('2014', '2014-01-01', '2014-12-31')
     >>> downloads.clear()
 
     >>> manager.query.link('School').click()
 
 Let's export the empty school set up.
 
-    >>> manager.query.link('School Export').click()
-    >>> manager.query.button('Download').click()
+    >>> manager.open('http://localhost/export.xls')
 
 We have to wait until the download is saved:
 

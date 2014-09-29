@@ -21,45 +21,17 @@ Unit tests for course and section subscriber validation.
 
 import unittest
 import doctest
-from datetime import date, timedelta
 
-from schooltool.schoolyear.testing import (setUp, tearDown,
-                                           provideStubUtility,
+from schooltool.schoolyear.testing import (provideStubUtility,
                                            provideStubAdapter)
-from schooltool.schoolyear.ftesting import schoolyear_functional_layer
-from schooltool.app.interfaces import ISchoolToolApplication
-from schooltool.schoolyear.interfaces import ISchoolYearContainer
-from schooltool.schoolyear.schoolyear import SchoolYear
 from schooltool.term.interfaces import ITerm
-from schooltool.term.term import Term
 from schooltool.course.interfaces import ISectionContainer
 from schooltool.course.section import Section
+from schooltool.course.tests import setUp, tearDown
+from schooltool.course.tests import setUpSchoolYear
+from schooltool.course.tests import setUpTerms
+from schooltool.course.tests import setUpSections
 
-
-def setUpSchoolYear(year=2000):
-    year_container = ISchoolYearContainer(ISchoolToolApplication(None))
-    sy = year_container[str(year)] = SchoolYear(
-        str(year), date(year, 1, 1), date(year+1, 1, 1) - timedelta(1))
-    return sy
-
-
-def setUpTerms(schoolyear, term_count=3):
-    term_delta = timedelta(
-        ((schoolyear.last - schoolyear.first) / term_count).days)
-    start_date = schoolyear.first
-    for n in range(term_count):
-        finish_date = start_date + term_delta - timedelta(1)
-        schoolyear['Term%d' % (n+1)] = Term(
-            'Term %d' % (n+1), start_date, finish_date)
-        start_date = finish_date + timedelta(1)
-
-
-def setUpSections(term_list, sections_per_term=1):
-    for term in term_list:
-        sections = ISectionContainer(term)
-        for n in range(sections_per_term):
-            name = 'Sec%d'%(n+1)
-            sections[name] = Section(name)
 
 
 def doctest_Section_linking_terms():
@@ -194,12 +166,17 @@ def doctest_copySection():
         >>> year = setUpSchoolYear(2000)
         >>> setUpTerms(year, 2)
 
-        >>> section = Section('English A')
-        >>> section.instructors.add(Person('teacher', 'Mr. Jones'))
-        >>> section.members.add(Person('first','First'))
-        >>> section.members.add(Person('second','Second'))
-        >>> section.members.add(Person('third','Third'))
-        >>> section.courses.add(Course(title="English"))
+        >>> section = sections['english'] = Section('English A')
+        >>> teacher = persons['teachers'] = Person('teacher', 'Mr. Jones')
+        >>> first = persons['first'] = Person('first','First')
+        >>> second = persons['second'] = Person('second','Second')
+        >>> third = persons['third'] = Person('third','Third')
+        >>> course = courses['english'] = Course(title="English")
+        >>> section.instructors.add(teacher)
+        >>> section.members.add(first)
+        >>> section.members.add(second)
+        >>> section.members.add(third)
+        >>> section.courses.add(course)
         >>> ISectionContainer(year['Term1'])['Sec1'] = section
 
     Let's copy it to another term.
@@ -250,7 +227,6 @@ def test_suite():
                                  extraglobs={'provideAdapter': provideStubAdapter,
                                              'provideUtility': provideStubUtility},
                                  setUp=setUp, tearDown=tearDown)
-    suite.layer = schoolyear_functional_layer
     return suite
 
 

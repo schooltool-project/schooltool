@@ -40,6 +40,9 @@ Adding a student will have only student demos:
     ID
     Ethnicity
     Place of birth
+    Date of un-enrollment
+    Reason for un-enrollment
+    Destination school
 
     >>> manager.getControl('First name').value = "John"
     >>> manager.getControl('Last name').value = "Petterson"

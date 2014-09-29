@@ -162,3 +162,30 @@ class ZCMLWrapper(object):
     def execute(self):
         if self.context is not None:
             self.context.execute_actions()
+
+
+def getIntegrationTestZCML():
+    zcml = ZCMLWrapper()
+    zcml.setUp(
+        namespaces={"": "http://namespaces.zope.org/zope"},
+        i18n_domain='schooltool')
+    zcml.include('schooltool.common', file='zcmlfiles.zcml')
+    # We define the default pemissions here, because though widely used,
+    # they are currently mangled with other stuff in schooltool.common
+    zcml.string('''
+      <permission id="schooltool.view" title="View" />
+      <permission id="schooltool.edit" title="Edit Info" />
+    ''')
+
+    zcml.include('zope.intid')
+    zcml.string('''
+      <utility
+        factory="zope.intid.IntIds"
+        provides="zope.intid.interfaces.IIntIds"
+      />
+    ''')
+
+    zcml.include('schooltool.relationship', file='relationship.zcml')
+    zcml.include('schooltool.app', file='catalog.zcml')
+    zcml.include('zope.keyreference')
+    return zcml

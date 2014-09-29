@@ -35,29 +35,35 @@ def doctest_relate():
         >>> from zope.interface import implements
         >>> from schooltool.relationship.interfaces import IRelationshipLinks
 
-        >>> class Relatable:
-        ...     implements(IRelationshipLinks)
-        ...     def __init__(self, name):
-        ...         self._name = name
-        ...     def __repr__(self):
-        ...         return self._name
-        ...     def __iter__(self):
-        ...         return iter([])
+        >>> from schooltool.relationship.relationship import LinkSet
+        >>> from schooltool.relationship.uri import URIObject as URIStub
+        >>> from schooltool.relationship.tests import SomeContainedPersistent
+        >>> prefix = 'example:'
+        >>> class Relatable(LinkSet):
         ...     def add(self, link):
-        ...         print 'Linking %s with %s (the %s in %s)' % (self,
-        ...                 link.target, link.role.uri, link.rel_type)
+        ...         super(Relatable, self).add(link)
+        ...         this = self.__parent__
+        ...         print 'Linking %s with %s (the %s in %s)' % (
+        ...                 this, link.target, str(link.role.uri).replace(prefix, ''), str(link.rel_type).replace(prefix, ''))
+        >>> from schooltool.relationship.annotatable import getRelationshipLinks
+        >>> def getLinks(context):
+        ...     return getRelationshipLinks(context, Relatable)
+        >>> from zope.component import provideAdapter
+        >>> from zope.annotation.interfaces import IAnnotatable
+        >>> from schooltool.relationship.interfaces import IRelationshipLinks
+        >>> provideAdapter(getLinks, [IAnnotatable], IRelationshipLinks)
 
-        >>> fred = Relatable('Fred')
-        >>> wilma = Relatable('Wilma')
+        >>> fred = persons['fred'] = SomeContainedPersistent('Fred')
+        >>> wilma = persons['wilma'] = SomeContainedPersistent('Wilma')
 
     Now we can test relate
 
         >>> from schooltool.relationship.relationship import relate
 
-        >>> husband = URIStub('husband')
-        >>> wife = URIStub('wife')
+        >>> husband = URIStub('%shusband' % prefix)
+        >>> wife = URIStub('%swife' % prefix)
 
-        >>> relate('marriage', (fred, husband), (wilma, wife))
+        >>> relate(URIStub('%smarriage' % prefix), (fred, husband), (wilma, wife))
         Linking Fred with Wilma (the wife in marriage)
         Linking Wilma with Fred (the husband in marriage)
 
@@ -69,21 +75,29 @@ def doctest_LinkSet_getTargetsByRole():
 
         >>> from schooltool.relationship.relationship import LinkSet, Link
 
-        >>> obj = LinkSet()
-
-        >>> role_a = URIStub('role_of_a')
-        >>> role_b = URIStub('role_of_b')
-
-        >>> obj.add(Link(role_b, 'a', role_a, 'rel_type_a'))
-        >>> obj.add(Link(role_a, 'b', role_b, 'rel_type_b'))
+        >>> from schooltool.relationship.tests import SomeContainedPersistent
+        >>> abc = persons['abc'] = SomeContainedPersistent('abc')
+        >>> from schooltool.relationship.annotatable import getRelationshipLinks
+        >>> a = persons['a'] = SomeContainedPersistent('a')
+        >>> b = persons['b'] = SomeContainedPersistent('b')
+        >>> from schooltool.relationship.uri import URIObject as URIStub
+        >>> role_a = URIStub('rel:role_of_a')
+        >>> role_b = URIStub('rel:role_of_b')
+        >>> from schooltool.relationship.relationship import relate
+        >>> relate(URIStub('example:rel'), (a, role_a), (b, role_b))
 
     Now we can test getTargetsByRole
 
-        >>> obj.getTargetsByRole(role_a)
-        ['a']
+        >>> role_c = URIStub('rel:role_c')
+        >>> obj = getRelationshipLinks(a)
         >>> obj.getTargetsByRole(role_b)
-        ['b']
-        >>> obj.getTargetsByRole(URIStub('role_c'))
+        [b]
+        >>> obj.getTargetsByRole(role_c)
+        []
+        >>> obj = getRelationshipLinks(b)
+        >>> obj.getTargetsByRole(role_a)
+        [a]
+        >>> obj.getTargetsByRole(role_c)
         []
 
     """
@@ -92,12 +106,10 @@ def doctest_LinkSet_getTargetsByRole():
 def doctest_RelationshipSchema():
     """Tests for RelationshipSchema
 
-        >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> setUp()
-
     The constructor takes exactly two keyword arguments
 
         >>> from schooltool.relationship import RelationshipSchema
+        >>> from schooltool.relationship.uri import URIObject as URIStub
         >>> role_mgr = URIStub('example:Mgr')
         >>> role_rpt = URIStub('example:Rpt')
         >>> role_spv = URIStub('example:Spv')
@@ -113,15 +125,15 @@ def doctest_RelationshipSchema():
 
     This works:
 
-        >>> Management = RelationshipSchema('example:Mgmt',
+        >>> Management = RelationshipSchema(URIStub('example:Mgmt'),
         ...                                 manager=role_mgr,
         ...                                 report=role_rpt)
 
     You can call relationship schemas
 
-        >>> from schooltool.relationship.tests import SomeObject
-        >>> a = SomeObject('a')
-        >>> b = SomeObject('b')
+        >>> from schooltool.relationship.tests import SomeContainedPersistent
+        >>> a = persons['a'] = SomeContainedPersistent('a')
+        >>> b = persons['b'] = SomeContainedPersistent('b')
         >>> Management(manager=a, report=b)
 
     You will see that a is b's manager, and b is a's report:
@@ -134,7 +146,8 @@ def doctest_RelationshipSchema():
 
     Order of arguments does not matter
 
-        >>> c, d = map(SomeObject, ['c', 'd'])
+        >>> c = persons['c'] = SomeContainedPersistent('c')
+        >>> d = persons['d'] = SomeContainedPersistent('d')
         >>> Management(report=c, manager=d)
         >>> getRelatedObjects(c, role_mgr)
         [d]
@@ -160,31 +173,21 @@ def doctest_RelationshipSchema():
           ...
         TypeError: Too many keyword arguments.
 
-    Cleanup
-
-        >>> tearDown()
-
     """
 
 
 def doctest_unrelateAll():
     r"""Tests for unrelateAll.
 
-        >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> setUp()
+    Nothing happens if the object has no relationships.
 
-    Let us catch all events and remember them
-
+        >>> from schooltool.relationship.tests import SomeContainedPersistent
+        >>> a = persons['a'] = SomeContainedPersistent('a')
+        >>> from schooltool.relationship import unrelateAll
         >>> events = []
         >>> import zope.event
         >>> old_subscribers = zope.event.subscribers[:]
         >>> zope.event.subscribers.append(events.append)
-
-    Nothing happens if the object has no relationships.
-
-        >>> from schooltool.relationship.tests import SomeObject
-        >>> a = SomeObject('a')
-        >>> from schooltool.relationship import unrelateAll
         >>> unrelateAll(a)
         >>> events
         []
@@ -192,7 +195,10 @@ def doctest_unrelateAll():
     Suppose that the object has a number of relationships
 
         >>> from schooltool.relationship import relate
-        >>> b, c, d = map(SomeObject, ['b', 'c', 'd'])
+        >>> b = persons['b'] = SomeContainedPersistent('b')
+        >>> c = persons['c'] = SomeContainedPersistent('c')
+        >>> d = persons['d'] = SomeContainedPersistent('d')
+
         >>> relationships = [
         ...       ('example:SomeRelationship', (a, 'example:Foo'),
         ...                                    (b, 'example:Bar')),
@@ -249,7 +255,6 @@ def doctest_unrelateAll():
         True
 
         >>> zope.event.subscribers[:] = old_subscribers
-        >>> tearDown()
 
     """
 
@@ -257,11 +262,9 @@ def doctest_unrelateAll():
 def doctest_BoundRelationshipProperty():
     """Tests for BoundRelationshipProperty.
 
-        >>> from schooltool.relationship.tests import setUp, tearDown
-        >>> setUp()
-
     Set up two types of membership.
 
+        >>> from schooltool.relationship.uri import URIObject as URIStub
         >>> role_student = URIStub('example:Student')
         >>> role_instructor = URIStub('example:Instructor')
         >>> role_course = URIStub('example:Course')
@@ -280,16 +283,16 @@ def doctest_BoundRelationshipProperty():
     Create Course and Person classes.  We will use the RelationshipProperty
     that should bind to an instance as BoundRelationshipProperty.
 
-        >>> from schooltool.relationship.tests import SomeObject
+        >>> from schooltool.relationship.tests import SomeContainedPersistent
         >>> from schooltool.relationship.relationship import RelationshipProperty
 
-        >>> class Course(SomeObject):
+        >>> class Course(SomeContainedPersistent):
         ...     students = RelationshipProperty(
         ...         uri_attending, role_course, role_student)
         ...     instructors = RelationshipProperty(
         ...         uri_instruction, role_course, role_instructor)
 
-        >>> class Person(SomeObject):
+        >>> class Person(SomeContainedPersistent):
         ...     attends = RelationshipProperty(
         ...         uri_attending, role_student, role_course)
         ...     instructs = RelationshipProperty(
@@ -297,17 +300,19 @@ def doctest_BoundRelationshipProperty():
 
     Set up a course with several students.
 
-        >>> course_a = Course('course A')
+        >>> course_a = courses['a'] = Course('course A')
+        >>> john = persons['john'] = Person('John')
+        >>> peter = persons['peter'] = Person('Peter')
+        >>> cathy = persons['cathy'] = Person('Cathy')
+        >>> students = [john, peter, cathy]
 
-        >>> john, peter, cathy = students = [
-        ...     Person(name) for name in ['John', 'Peter', 'Cathy']]
         >>> for student in students:
         ...     Attending(student=student, course=course_a)
 
     Set up a teacher that instructs the two courses.
 
-        >>> teacher = Person('William')
-        >>> course_b = Course('course B')
+        >>> teacher = persons['william'] = Person('William')
+        >>> course_b = courses['b'] = Course('course B')
         >>> Instruction(instructor=teacher, course=course_a)
         >>> Instruction(instructor=teacher, course=course_b)
 
@@ -345,10 +350,10 @@ def doctest_BoundRelationshipProperty():
 
     You can also obtain RelationshipInfo helpers for related objects.
 
-        >>> course_a.instructors.relationships
+        >>> list(course_a.instructors.relationships)
         [<schooltool.relationship.relationship.RelationshipInfo object ...>]
 
-        >>> rel_info = course_a.instructors.relationships[0]
+        >>> rel_info = list(course_a.instructors.relationships)[0]
         >>> rel_info.source
         course A
         >>> rel_info.target
@@ -361,7 +366,7 @@ def doctest_BoundRelationshipProperty():
         >>> list(teacher.instructs)
         [course A, course B]
 
-        >>> rel_info = teacher.instructs.relationships[0]
+        >>> rel_info = list(teacher.instructs.relationships)[0]
         >>> rel_info.source
         William
         >>> rel_info.target
@@ -375,17 +380,19 @@ def doctest_BoundRelationshipProperty():
         >>> [info.target for info in course_b.instructors.relationships]
         [William]
 
-        >>> tearDown()
-
     """
 
 
+from schooltool.app.tests import setUp, tearDown
+
+
 def test_suite():
-    optionflags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
+    optionflags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS | doctest.REPORT_ONLY_FIRST_FAILURE
     return unittest.TestSuite([
-                doctest.DocFileSuite('../README.txt'),
-                doctest.DocTestSuite('schooltool.relationship.relationship'),
-                doctest.DocTestSuite(optionflags=optionflags),
+                doctest.DocFileSuite('../README.txt', setUp=setUp, tearDown=tearDown, optionflags=optionflags),
+                # XXX: unit tests of each class need to be updated
+                # doctest.DocTestSuite('schooltool.relationship.relationship'),
+                doctest.DocTestSuite(setUp=setUp, tearDown=tearDown, optionflags=optionflags),
            ])
 
 if __name__ == '__main__':

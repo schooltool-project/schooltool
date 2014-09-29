@@ -136,11 +136,11 @@ def unrelate(rel_type, (a, role_of_a), (b, role_of_b)):
         link_a_to_b = links_of_a.find(role_of_a, b, role_of_b, rel_type)
     except ValueError:
         raise NoSuchRelationship
-    extra_info = link_a_to_b.extra_info
+    shared = link_a_to_b.shared
     zope.event.notify(BeforeRemovingRelationshipEvent(rel_type,
                                                       (a, role_of_a),
                                                       (b, role_of_b),
-                                                      extra_info))
+                                                      shared))
     links_of_a.remove(link_a_to_b)
     # If links_of_b.find raises a ValueError, our data structures are out of
     # sync.
@@ -149,7 +149,7 @@ def unrelate(rel_type, (a, role_of_a), (b, role_of_b)):
     zope.event.notify(RelationshipRemovedEvent(rel_type,
                                                (a, role_of_a),
                                                (b, role_of_b),
-                                               extra_info))
+                                               shared))
 
 
 def unrelateAll(obj):
@@ -1046,7 +1046,7 @@ class LinkSet(Persistent, Contained):
     def clear(self):
         deleted = list(self._links.items())
         self._links.clear()
-        self._byrole.clear()
+        self._lids.clear()
         for name, link in deleted:
             notify(ObjectRemovedEvent(link, self._links, name))
 

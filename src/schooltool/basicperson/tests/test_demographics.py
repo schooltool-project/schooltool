@@ -161,7 +161,8 @@ def doctest_setUpDefaultDemographics():
         >>> setUpDefaultDemographics(app)
 
         >>> app['schooltool.basicperson.demographics_fields'].keys()
-        ['ID', 'ethnicity', 'language', 'placeofbirth', 'citizenship']
+        ['ID', 'ethnicity', 'language', 'placeofbirth', 'citizenship',
+         'leave_date', 'leave_reason', 'leave_destination']
 
     """
 
@@ -188,40 +189,43 @@ def doctest_DemographicsFields():
 
         >>> [f.__name__ for f in dfs.filter_key('anything')]
         [u'ID', u'ethnicity', u'language', u'placeofbirth', u'citizenship',
-                u'email']
+         u'email']
 
     When we pass 'teachers', it picks up the additional fields that are for
     teachers.
 
         >>> [f.__name__ for f in dfs.filter_key('teachers')]
         [u'ID', u'ethnicity', u'language', u'placeofbirth', u'citizenship',
-                u'email', u'supervisor', u'phone']
+         u'email', u'supervisor', u'phone']
 
     When we pass 'students', it picks up the additional fields that are for
     students.
 
         >>> [f.__name__ for f in dfs.filter_key('students')]
         [u'ID', u'ethnicity', u'language', u'placeofbirth', u'citizenship',
-                u'email', u'advisor', u'phone']
+         u'leave_date', u'leave_reason', u'leave_destination',
+         u'email', u'advisor', u'phone']
 
     We also have a filter_keys method to return fields whose keys are in the
     list passed.
 
         >>> [f.__name__ for f in dfs.filter_keys([])]
         [u'ID', u'ethnicity', u'language', u'placeofbirth', u'citizenship',
-                u'email']
+         u'email']
 
         >>> [f.__name__ for f in dfs.filter_keys(['students'])]
         [u'ID', u'ethnicity', u'language', u'placeofbirth', u'citizenship',
-                u'email', u'advisor', u'phone']
+         u'leave_date', u'leave_reason', u'leave_destination',
+         u'email', u'advisor', u'phone']
 
         >>> [f.__name__ for f in dfs.filter_keys(['teachers'])]
         [u'ID', u'ethnicity', u'language', u'placeofbirth', u'citizenship',
-                u'email', u'supervisor', u'phone']
+         u'email', u'supervisor', u'phone']
 
         >>> [f.__name__ for f in dfs.filter_keys(['students', 'teachers'])]
         [u'ID', u'ethnicity', u'language', u'placeofbirth', u'citizenship',
-                u'email', u'supervisor', u'advisor', u'phone']
+         u'leave_date', u'leave_reason', u'leave_destination',
+         u'email', u'supervisor', u'advisor', u'phone']
     """
 
 

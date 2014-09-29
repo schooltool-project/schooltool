@@ -20,10 +20,26 @@ Basic stubs for testing SchoolTool.
 """
 
 from persistent.interfaces import IPersistent
+from transaction import commit
 
+from zope.annotation.interfaces import IAttributeAnnotatable
+from zope.app.publication.zopepublication import ZopePublication
+from zope.app.testing.setup import createSiteManager
 from zope.interface import implements
 from zope.component import adapts
+from zope.component import provideAdapter
+from zope.container.btree import BTreeContainer
+from zope.event import notify
 from zope.keyreference.interfaces import IKeyReference
+from zope.site import SiteManagerContainer
+from zope.traversing.interfaces import IContainmentRoot
+
+from ZODB.tests.util import DB
+
+from schooltool.app.interfaces import ISchoolToolApplication
+from schooltool.app.interfaces import ApplicationInitializationEvent
+from schooltool.app.interfaces import CatalogStartUpEvent
+from schooltool.app.main import initializeSchoolToolPlugins
 
 
 class KeyReferenceStub(object):
@@ -46,3 +62,25 @@ class KeyReferenceStub(object):
         if self.key_type_id != other.key_type_id:
             return cmp(self.key_type_id, other.key_type_id)
         return cmp(self.uid, other.uid)
+
+
+class AppStub(BTreeContainer, SiteManagerContainer):
+    implements(ISchoolToolApplication, IAttributeAnnotatable, IContainmentRoot)
+
+    def __init__(self):
+        super(AppStub, self).__init__()
+        self.setup()
+
+    def setup(self):
+        db = DB()
+        conn = db.open()
+        root = conn.root()
+        root[ZopePublication.root_name] = self
+        provideAdapter(
+            lambda ignored: self,
+            adapts=(None,),
+            provides=ISchoolToolApplication)
+        commit()
+        createSiteManager(self, setsite=True)
+        initializeSchoolToolPlugins(ApplicationInitializationEvent(self))
+        notify(CatalogStartUpEvent(self))

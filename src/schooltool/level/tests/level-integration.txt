@@ -13,15 +13,8 @@ Level data model
 
 There is a root container, initialized on application startup::
 
-    >>> from schooltool.app.interfaces import ISchoolToolApplication
-    >>> from schooltool.app.interfaces import ApplicationInitializationEvent
-    >>> from schooltool.app.main import initializeSchoolToolPlugins
-
-    >>> app = ISchoolToolApplication(None)
-    >>> initializeSchoolToolPlugins(ApplicationInitializationEvent(app))
-
     >>> sorted(app.keys())
-    ['schooltool.level.level', 'schooltool.schoolyear']
+    [u'schooltool.app.catalog:Catalogs', u'schooltool.course.course', u'schooltool.level.level', u'schooltool.relationship.uri']
 
     >>> app['schooltool.level.level']
     <schooltool.level.level.LevelContainer ...>
@@ -59,12 +52,13 @@ Linking levels to courses
 Levels are linked to courses via schooltool.relationship.  There
 is a helper attribute to manage the relationships::
 
-    >>> math = CourseStub('Math')
-
+    >>> courses = app['schooltool.course.course']
+    >>> math = courses['math'] = CourseStub('Math')
     >>> level_1 = levels['1']
-    >>> level_1.courses.add(math)
-
     >>> level_2 = levels['2']
+    >>> from transaction import commit
+    >>> commit()
+    >>> level_1.courses.add(math)
     >>> level_2.courses.add(math)
 
     >>> from schooltool.level.level import URILevelCourses, URILevel

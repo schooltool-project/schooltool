@@ -28,7 +28,6 @@ from zope.container.btree import BTreeContainer
 from zope.component import provideHandler
 
 from schooltool.relationship.tests import setUpRelationships
-from schooltool.generations.tests import ContextStub
 from schooltool.app.interfaces import ISchoolToolApplication
 from schooltool.basicperson.person import BasicPerson
 from schooltool.group.group import Group
@@ -38,9 +37,11 @@ from schooltool.relationship.relationship import relate
 from schooltool.app.membership import URIMember, URIGroup, URIMembership
 from schooltool.course.interfaces import ICourse
 
-
-class AppStub(BTreeContainer):
-    implements(ISchoolToolApplication)
+from schooltool.testing.setup import getIntegrationTestZCML
+from schooltool.testing.stubs import AppStub
+from schooltool.generations.tests import ContextStub
+from schooltool.generations.tests import setUp
+from schooltool.generations.tests import tearDown
 
 
 class CourseStub(Contained):
@@ -69,8 +70,7 @@ def printRelationshipRemoved(event):
 def doctest_evolve30():
     """Evolution to generation 30.
 
-        >>> context = ContextStub()
-        >>> context.root_folder['app'] = app = AppStub()
+        >>> context = ContextStub(app)
 
         >>> persons = app['persons'] = BTreeContainer()
         >>> persons['will'] = BasicPerson("will", "William", "Straus")
@@ -160,16 +160,6 @@ def doctest_evolve30():
          <CourseStub(__name__="c3", course_id="custom")>]
 
     """
-
-
-def setUp(test):
-    setup.placelessSetUp()
-    setup.setUpAnnotations()
-    setUpRelationships()
-
-
-def tearDown(test):
-    setup.placelessTearDown()
 
 
 def test_suite():

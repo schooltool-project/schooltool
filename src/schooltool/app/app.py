@@ -354,4 +354,9 @@ def beforeTraverseSchoolToolSite(event, site):
     threadSiteSubscriber(site, event)
     util = queryAdapter(event.request, IRequestHelpers)
     if util is not None:
-        event.request.util = util
+        # XXX: make old http('...') calls work
+        try:
+            event.request.util = util
+        except (AttributeError,):
+            pass
+

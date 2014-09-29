@@ -4884,8 +4884,11 @@ def doctest_EventDeleteView():
 
         >>> from schooltool.app.cal import Calendar, CalendarEvent
         >>> from schooltool.calendar.recurrent import DailyRecurrenceRule
-        >>> container = PersonContainer()
-        >>> directlyProvides(container, IContainmentRoot)
+        >>> from schooltool.testing.stubs import AppStub
+        >>> from schooltool.testing.setup import getIntegrationTestZCML
+        >>> zcml = getIntegrationTestZCML()
+        >>> app = AppStub()
+        >>> container = app['persons'] = PersonContainer()
         >>> person = container['person'] = Person('person')
         >>> cal = Calendar(person)
         >>> dtstart = datetime(2005, 2, 3, 12, 15)
@@ -4936,7 +4939,7 @@ def doctest_EventDeleteView():
         ...     if view.request.response.getStatus() != 302:
         ...         return False
         ...     location = view.request.response.getHeader('Location')
-        ...     expected = 'http://127.0.0.1/%s/calendar' % (person, )
+        ...     expected = 'http://127.0.0.1/persons/%s/calendar' % (person, )
         ...     assert location == expected, location
         ...     return True
         >>> redirected(request)
@@ -5067,7 +5070,8 @@ def doctest_EventDeleteView():
     Overlaid events should have their removal links pointing to their
     source calendars so they are not handled:
 
-        >>> cal2 = Calendar(Person()) # a dummy calendar
+        >>> dummy = container['dummy'] = Person('dummy')
+        >>> cal2 = Calendar(dummy) # a dummy calendar
         >>> owner = container['friend'] = Person('friend')
         >>> info = owner.overlaid_calendars.add(cal)
         >>> info = owner.overlaid_calendars.add(cal2)

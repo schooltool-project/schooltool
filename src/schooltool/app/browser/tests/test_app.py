@@ -27,7 +27,7 @@ from zope.app.testing import setup
 from zope.traversing.browser.absoluteurl import absoluteURL
 from zope.component import provideAdapter, provideUtility
 
-from schooltool.app.browser.testing import setUp, tearDown
+from schooltool.app.tests import setUp, tearDown
 from schooltool.testing import setup as sbsetup
 
 
@@ -41,8 +41,8 @@ def doctest_ApplicationView():
         >>> from schooltool.app.app import getApplicationPreferences
         >>> from schooltool.app.interfaces import IApplicationPreferences
         >>> from schooltool.app.interfaces import ISchoolToolApplication
-
-        >>> app = sbsetup.setUpSchoolToolSite()
+        >>> from schooltool.app.interfaces import IHaveCalendar
+        >>> from zope.interface import alsoProvides
 
         >>> provideAdapter(getApplicationPreferences,
         ...                (ISchoolToolApplication,), IApplicationPreferences)
@@ -50,6 +50,7 @@ def doctest_ApplicationView():
     Now let's create a view
 
         >>> from schooltool.app.browser.app import ApplicationView
+        >>> alsoProvides(app, IHaveCalendar)
         >>> request = TestRequest()
         >>> view = ApplicationView(app, request)
         >>> view.update()
@@ -80,8 +81,6 @@ def doctest_LoginView():
 
     Some framework setup:
 
-        >>> setup.setUpAnnotations()
-
         >>> def getCalendarWithNakedObject(obj):
         ...     from schooltool.app.cal import getCalendar
         ...     from zope.security.proxy import removeSecurityProxy
@@ -109,11 +108,9 @@ def doctest_LoginView():
 
     Suppose we have a SchoolTool app and a person:
 
-        >>> app = sbsetup.setUpSchoolToolSite()
         >>> persons = app['persons']
 
-        >>> frog = Person('frog')
-        >>> persons[None] = frog
+        >>> frog = persons['frog'] = Person('frog')
         >>> frog.setPassword('pond')
 
     We create our view:
@@ -125,6 +122,7 @@ def doctest_LoginView():
         >>> class StubPrincipal(object):
         ...     implements(IPrincipal)
         ...     title = "Some user"
+        ...     id = 'some_user'
         ...
         >>> request.setPrincipal(StubPrincipal())
         >>> View = SimpleViewClass('../templates/login.pt', bases=(LoginView,))
@@ -231,14 +229,10 @@ def doctest_LogoutView():
 
         >>> from schooltool.app.interfaces import ISchoolToolApplication
         >>> from zope.component import provideAdapter
-        >>> app = sbsetup.setUpSchoolToolSite()
         >>> persons = app['persons']
-        >>> provideAdapter(lambda context: app, adapts=[None],
-        ...                provides=ISchoolToolApplication)
 
         >>> from schooltool.person.person import Person
-        >>> frog = Person('frog')
-        >>> persons[None] = frog
+        >>> frog = persons['frog'] = Person('frog')
         >>> frog.setPassword('pond')
 
     Also, we have an authentication utility:
@@ -302,8 +296,6 @@ def doctest_hasPermissions():
         ...                         IPrincipalPermissionManager
         >>> from zope.securitypolicy.principalpermission import \
         ...                         AnnotationPrincipalPermissionManager
-        >>> setup.setUpAnnotations()
-        >>> setup.setUpTraversal()
         >>> provideAdapter(AnnotationPrincipalPermissionManager,
         ...                (IAnnotatable,), IPrincipalPermissionManager)
 
@@ -313,14 +305,20 @@ def doctest_hasPermissions():
         >>> from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
         >>> old = setSecurityPolicy(ZopeSecurityPolicy)
 
-    Suppose we have a SchoolTool object:
-
-        >>> app = sbsetup.setUpSchoolToolSite()
-
     In it, we have a principal:
 
         >>> from schooltool.person.person import Person
-        >>> app['persons']['1'] = Person('joe', title='Joe')
+        >>> app['persons']['joe'] = Person('joe', title='Joe')
+        >>> from zope.authentication.interfaces import IAuthentication
+        >>> from schooltool.app.security import SchoolToolAuthenticationUtility
+        >>> auth = SchoolToolAuthenticationUtility()
+        >>> provideUtility(auth, IAuthentication)
+        >>> from schooltool.app.security import PersonContainerAuthenticationPlugin
+        >>> plugin = PersonContainerAuthenticationPlugin()
+        >>> provideUtility(plugin)
+
+        >>> auth.__parent__ = app
+        >>> sbsetup.setUpSessions()
 
     He does not have neither 'super' nor 'duper' permissions on our
     schooltool app:
@@ -362,14 +360,11 @@ def doctest_ApplicationPreferencesView():
     We need to setup a SchoolToolApplication site and build our
     ISchoolToolApplication adapter:
 
-        >>> app = sbsetup.setUpSchoolToolSite()
-
         >>> from schooltool.app.browser.app import ApplicationPreferencesView
         >>> from schooltool.app.app import getApplicationPreferences
         >>> from schooltool.app.interfaces import IApplicationPreferences
         >>> from schooltool.app.interfaces import ISchoolToolApplication
 
-        >>> setup.setUpAnnotations()
         >>> provideAdapter(getApplicationPreferences,
         ...                (ISchoolToolApplication,), IApplicationPreferences)
 
@@ -469,7 +464,6 @@ def doctest_ContentLink():
         >>> class ContentStub(object):
         ...     title='Foo'
 
-        >>> app = sbsetup.createSchoolToolApplication()
         >>> app['content'] = ContentStub()
 
         >>> provider = ContentLink(app['content'], TestRequest(), None)
@@ -487,7 +481,6 @@ def doctest_ContentLabel():
         >>> class ContentStub(object):
         ...     title='Foo'
 
-        >>> app = sbsetup.createSchoolToolApplication()
         >>> app['content'] = ContentStub()
 
         >>> provider = ContentLabel(app['content'], TestRequest(), None)

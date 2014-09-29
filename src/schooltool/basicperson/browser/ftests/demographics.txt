@@ -94,6 +94,18 @@ fields that are in it:
           ...<option value="5" selected="selected">5</option>...<input
                 type="checkbox" name="delete:list" value="citizenship" /><a href="http://localhost/demographics/citizenship">citizenship</a>
     </div>
+    <div>
+          ...<option value="6" selected="selected">6</option>...<input
+                type="checkbox" name="delete:list" value="leave_date" /><a href="http://localhost/demographics/leave_date">leave_date</a>
+    </div>
+    <div>
+          ...<option value="7" selected="selected">7</option>...<input
+                type="checkbox" name="delete:list" value="leave_reason" /><a href="http://localhost/demographics/leave_reason">leave_reason</a>
+    </div>
+    <div>
+          ...<option value="8" selected="selected">8</option>...<input
+                type="checkbox" name="delete:list" value="leave_destination" /><a href="http://localhost/demographics/leave_destination">leave_destination</a>
+    </div>
 
 Let's make language the second field:
 
@@ -105,6 +117,9 @@ Let's make language the second field:
     <a href="http://localhost/demographics/ethnicity">ethnicity</a>
     <a href="http://localhost/demographics/placeofbirth">placeofbirth</a>
     <a href="http://localhost/demographics/citizenship">citizenship</a>
+    <a href="http://localhost/demographics/leave_date">leave_date</a>
+    <a href="http://localhost/demographics/leave_reason">leave_reason</a>
+    <a href="http://localhost/demographics/leave_destination">leave_destination</a>
 
 And delete the place of birth field:
 
@@ -115,6 +130,10 @@ And delete the place of birth field:
     <a href="http://localhost/demographics/language">language</a>
     <a href="http://localhost/demographics/ethnicity">ethnicity</a>
     <a href="http://localhost/demographics/citizenship">citizenship</a>
+    <a href="http://localhost/demographics/leave_date">leave_date</a>
+    <a href="http://localhost/demographics/leave_reason">leave_reason</a>
+    <a href="http://localhost/demographics/leave_destination">leave_destination</a>
+
 
 Now if we'd go to the person add form - the order of the fields would
 be different:
