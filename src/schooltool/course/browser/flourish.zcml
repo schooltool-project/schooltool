@@ -741,4 +741,37 @@
   <zope:adapter
       factory=".course.CourseLevelFormAdapter" />
 
+  <report:reportLink
+      name="sign_in_out"
+      for="schooltool.course.interfaces.ISection"
+      layer="schooltool.skin.flourish.IFlourishLayer"
+      permission="schooltool.view"
+      group="Section"
+      description="XXX description XXX"
+      title="Sign In &amp; Out"
+      file_type="pdf"
+      link="request_sign_in_out.html"
+      />
+
+  <flourish:page
+      name="request_sign_in_out.html"
+      for="schooltool.course.interfaces.ISection"
+      class="schooltool.group.browser.group.RequestSignInOutReportView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:pdf
+      name="sign_in_out.pdf"
+      for="schooltool.course.interfaces.ISection"
+      class=".section.SectionSignInOutPDFView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:content
+      name="sign_in_out_table"
+      for="schooltool.course.interfaces.ISection"
+      class="schooltool.group.browser.group.SignInOutTable"
+      permission="schooltool.view"
+      />
+
 </configure>

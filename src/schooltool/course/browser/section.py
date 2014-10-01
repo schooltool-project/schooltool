@@ -68,6 +68,7 @@ from schooltool.course.interfaces import ICourse, ICourseContainer
 from schooltool.course.interfaces import ISection, ISectionContainer
 from schooltool.course.section import Section
 from schooltool.course.section import copySection
+from schooltool.group.browser.group import SignInOutPDFView
 from schooltool.person.interfaces import IPerson
 from schooltool.person.interfaces import IPersonFactory
 from schooltool.report.browser.report import RequestRemoteReportDialog
@@ -1924,3 +1925,45 @@ class SectionMembershipPersonListTable(StatusPersonListTable):
 class SectionInstructionPersonListTable(StatusPersonListTable):
 
     app_states_name = 'section-instruction'
+
+
+class SectionSignInOutPDFView(SignInOutPDFView):
+
+    @property
+    def message_title(self):
+        return _("section ${title} sign in & out",
+                 mapping={'title': self.context.title})
+
+    def formatDate(self, date, format='mediumDate'):
+        if date is None:
+            return ''
+        formatter = getMultiAdapter((date, self.request), name=format)
+        return formatter()
+
+    @property
+    def scope(self):
+        term = ITerm(self.context)
+        schoolyear = term.__parent__
+        return '%s | %s' % (term.title, schoolyear.title)
+
+    @property
+    def subtitles_left(self):
+        section = removeSecurityProxy(self.context)
+        instructors = '; '.join([person.title
+                                 for person in section.instructors])
+        instructors_message = _('Instructors: ${instructors}',
+                                mapping={'instructors': instructors})
+        subtitles = [
+            '%s (%s)' % (section.title, section.__name__),
+            instructors_message,
+            ]
+        return subtitles
+
+    @property
+    def title(self):
+        return ', '.join([course.title for course in self.context.courses])
+
+    @property
+    def base_filename(self):
+        courses = [c.__name__ for c in self.context.courses]
+        return 'section_sign_in_out_%s' % '_'.join(courses)

@@ -452,4 +452,55 @@
       permission="schooltool.view"
       />
 
+  <report:reportLink
+      name="sign_in_out"
+      for="schooltool.group.interfaces.IGroup"
+      layer="schooltool.skin.flourish.IFlourishLayer"
+      permission="schooltool.view"
+      group="Group"
+      description="XXX description XXX"
+      title="Sign In &amp; Out"
+      file_type="pdf"
+      link="request_sign_in_out.html"
+      />
+
+  <flourish:page
+      name="request_sign_in_out.html"
+      for="schooltool.group.interfaces.IGroup"
+      class=".group.RequestSignInOutReportView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:pdf
+      name="sign_in_out.pdf"
+      for="schooltool.group.interfaces.IGroup"
+      class=".group.SignInOutPDFView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:content
+      name="sign_in_out_table"
+      for="schooltool.group.interfaces.IGroup"
+      class=".group.SignInOutTable"
+      permission="schooltool.view"
+      />
+
+  <flourish:viewlet
+      name="sign_in_out_styles"
+      after="*"
+      manager="schooltool.skin.flourish.report.PDFStylesheetSection"
+      view=".group.SignInOutPDFView"
+      class="schooltool.skin.flourish.report.PDFPart"
+      template="rml/sign_in_out_styles.pt"
+      permission="zope.Public"
+      />
+
+  <flourish:viewlet
+      name="table"
+      manager="schooltool.skin.flourish.report.PDFStory"
+      view=".group.SignInOutPDFView"
+      class=".group.SignInOutTablePart"
+      permission="zope.Public"
+      />
+
 </configure>

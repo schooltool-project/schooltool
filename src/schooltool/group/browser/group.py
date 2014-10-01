@@ -38,6 +38,7 @@ from zope.container.interfaces import INameChooser
 from zope.security import checkPermission
 from zope.security.proxy import removeSecurityProxy
 from zope.traversing.browser.absoluteurl import absoluteURL
+from zope.proxy import sameProxiedObjects
 from zope.i18n import translate
 from z3c.form import field, button, form
 from z3c.form.interfaces import HIDDEN_MODE
@@ -938,3 +939,98 @@ class PersonProfileGroupsPart(table.pdf.RMLTablePart):
     table_name = "groups_table"
     title = _("Group memberships")
 
+
+class SignInOutPDFView(flourish.report.PlainPDFPage):
+
+    name = _("Sign In & Out")
+
+    @property
+    def message_title(self):
+        return _("group ${title} sign in & out",
+                 mapping={'title': self.context.title})
+
+    @property
+    def scope(self):
+        schoolyear = ISchoolYear(self.context.__parent__)
+        return schoolyear.title
+
+    @property
+    def title(self):
+        return self.context.title
+
+    @property
+    def base_filename(self):
+        return 'group_sign_in_out_%s' % self.context.__name__
+
+
+class RequestSignInOutReportView(RequestRemoteReportDialog):
+
+    report_builder = 'sign_in_out.pdf'
+
+
+def number_getter(person, formatter):
+    for i, item in enumerate(formatter.items):
+        if sameProxiedObjects(person, item):
+            return i + 1
+
+
+class SignInOutTable(table.ajax.Table):
+
+    batch_size = 0
+    visible_column_names = ['number', 'title', 'time_in', 'signing_in',
+                            'time_out', 'signing_out']
+
+    def items(self):
+        return self.context.members
+
+    def sortOn(self):
+        return getUtility(IPersonFactory).sortOn()
+
+    def columns(self):
+        first_name = table.column.LocaleAwareGetterColumn(
+            name='first_name',
+            title=_(u'First Name'),
+            getter=lambda i, f: i.first_name,
+            subsort=True)
+        last_name = table.column.LocaleAwareGetterColumn(
+            name='last_name',
+            title=_(u'Last Name'),
+            getter=lambda i, f: i.last_name,
+            subsort=True)
+        number = zc.table.column.GetterColumn(
+            name='number',
+            title=u'#',
+            getter=number_getter)
+        title = table.column.LocaleAwareGetterColumn(
+            name='title',
+            title=_(u'Title'),
+            getter=lambda i, f: i.title,
+            subsort=True)
+        time_in = zc.table.column.GetterColumn(
+            name='time_in',
+            title=_(u'Time In'),
+            getter=lambda i, f: None)
+        signing_in = zc.table.column.GetterColumn(
+            name='signing_in',
+            title=_(u'Person signing in'),
+            getter=lambda i, f: None)
+        time_out = zc.table.column.GetterColumn(
+            name='time_out',
+            title=_(u'Time Out'),
+            getter=lambda i, f: None)
+        signing_out = zc.table.column.GetterColumn(
+            name='signing_out',
+            title=_(u'Person signing out'),
+            getter=lambda i, f: None)
+        return [first_name, last_name, number, title,
+                time_in, signing_in, time_out, signing_out]
+
+
+class SignInOutTablePart(table.pdf.RMLTablePart):
+
+    template = flourish.templates.XMLFile('rml/sign_in_out.pt')
+
+    table_name = 'sign_in_out_table'
+
+    def getColumnWidths(self, rml_columns):
+        return '5% 25% 10% 25% 10% 25%'
