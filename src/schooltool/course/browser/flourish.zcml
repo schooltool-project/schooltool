@@ -774,4 +774,45 @@
       permission="schooltool.view"
       />
 
+  <report:reportLink
+      name="students_list"
+      for="schooltool.course.interfaces.ISection"
+      layer="schooltool.skin.flourish.IFlourishLayer"
+      permission="schooltool.view"
+      group="Section"
+      description="XXX description XXX"
+      title="Students List"
+      file_type="pdf"
+      link="request_students_list.html"
+      />
+
+  <flourish:page
+      name="request_students_list.html"
+      for="schooltool.course.interfaces.ISection"
+      class=".section.RequestStudentsListReportView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:pdf
+      name="students_list.pdf"
+      for="schooltool.course.interfaces.ISection"
+      class=".section.StudentsListPDFView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:content
+      name="students_list_table"
+      for="schooltool.course.interfaces.ISection"
+      class=".section.StudentsListTable"
+      permission="schooltool.view"
+      />
+
+  <flourish:viewlet
+      name="table"
+      manager="schooltool.skin.flourish.report.PDFStory"
+      view=".section.StudentsListPDFView"
+      class=".section.StudentsListTablePart"
+      permission="zope.Public"
+      />
+
 </configure>

@@ -69,9 +69,11 @@ from schooltool.course.interfaces import ISection, ISectionContainer
 from schooltool.course.section import Section
 from schooltool.course.section import copySection
 from schooltool.group.browser.group import SignInOutPDFView
+from schooltool.group.browser.group import number_getter
 from schooltool.person.interfaces import IPerson
 from schooltool.person.interfaces import IPersonFactory
 from schooltool.report.browser.report import RequestRemoteReportDialog
+from schooltool.relationship.temporal import ACTIVE
 from schooltool.resource.browser.resource import EditLocationRelationships
 from schooltool.resource.browser.resource import EditEquipmentRelationships
 from schooltool.resource.interfaces import ILocation, IEquipment
@@ -1967,3 +1969,120 @@ class SectionSignInOutPDFView(SignInOutPDFView):
     def base_filename(self):
         courses = [c.__name__ for c in self.context.courses]
         return 'section_sign_in_out_%s' % '_'.join(courses)
+
+
+class RequestStudentsListReportView(RequestRemoteReportDialog):
+
+    report_builder = 'students_list.pdf'
+
+
+class StudentsListPDFView(flourish.report.PlainPDFPage):
+
+    name = _('Students List')
+
+    @property
+    def message_title(self):
+        return _("section ${title} students list",
+                 mapping={'title': self.context.title})
+
+    def formatDate(self, date, format='mediumDate'):
+        if date is None:
+            return ''
+        formatter = getMultiAdapter((date, self.request), name=format)
+        return formatter()
+
+    @property
+    def scope(self):
+        term = ITerm(self.context)
+        schoolyear = term.__parent__
+        return '%s | %s' % (term.title, schoolyear.title)
+
+    @property
+    def subtitles_left(self):
+        section = removeSecurityProxy(self.context)
+        instructors = '; '.join([person.title
+                                 for person in section.instructors])
+        instructors_message = _('Instructors: ${instructors}',
+                                mapping={'instructors': instructors})
+        subtitles = [
+            '%s (%s)' % (section.title, section.__name__),
+            instructors_message,
+            ]
+        return subtitles
+
+    @property
+    def title(self):
+        return ', '.join([course.title for course in self.context.courses])
+
+    @property
+    def base_filename(self):
+        courses = [c.__name__ for c in self.context.courses]
+        return 'section_students_list_%s' % '_'.join(courses)
+
+
+def level_getter(today):
+    def getter(person, formatter):
+        result = []
+        levels = person.levels
+        for level in levels.on(today).any(ACTIVE):
+            result.append(level)
+        if result:
+            return ', '.join([level.title for level in result])
+    return getter
+
+
+class StudentsListTable(table.ajax.Table):
+
+    batch_size = 0
+    visible_column_names = ['number', 'left_bracket', 'right_bracket',
+                            'title', 'level']
+
+    def items(self):
+        return self.context.members
+
+    def sortOn(self):
+        return getUtility(IPersonFactory).sortOn()
+
+    def columns(self):
+        today = getUtility(IDateManager).today
+        first_name = table.column.LocaleAwareGetterColumn(
+            name='first_name',
+            title=_(u'First Name'),
+            getter=lambda i, f: i.first_name,
+            subsort=True)
+        last_name = table.column.LocaleAwareGetterColumn(
+            name='last_name',
+            title=_(u'Last Name'),
+            getter=lambda i, f: i.last_name,
+            subsort=True)
+        number = zc.table.column.GetterColumn(
+            name='number',
+            title=u'#',
+            getter=number_getter)
+        left_bracket = zc.table.column.GetterColumn(
+            name='left_bracket',
+            title=u'',
+            getter=lambda i, f: u'[')
+        right_bracket = zc.table.column.GetterColumn(
+            name='right_bracket',
+            title=u'',
+            getter=lambda i, f: u']')
+        title = table.column.LocaleAwareGetterColumn(
+            name='title',
+            title=_(u'Title'),
+            getter=lambda i, f: i.title,
+            subsort=True)
+        level = zc.table.column.GetterColumn(
+            name='level',
+            title=_(u'Level'),
+            getter=level_getter(today))
+        return [first_name, last_name, number, left_bracket, right_bracket,
+                title, level]
+
+
+class StudentsListTablePart(table.pdf.RMLTablePart):
+
+    table_name = 'students_list_table'
+
+    def getColumnWidths(self, rml_columns):
+        return '5% 3% 3% 54% 35%'
