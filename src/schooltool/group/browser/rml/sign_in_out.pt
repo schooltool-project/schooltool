@@ -29,9 +29,9 @@
     </blockTable>
     <tal:block repeat="table options/content">
       <blockTable
-          style="sign-in-out"
           tal:attributes="colWidths options/col_widths;
-                          repeatRows python: len(table.get('headers', ()))"
+                          repeatRows python: len(table.get('headers', ()));
+                          style view/table_style"
                   alignment="left">
         <tr tal:repeat="row table/headers|nothing">
           <td tal:repeat="cell row" tal:content="structure cell" />

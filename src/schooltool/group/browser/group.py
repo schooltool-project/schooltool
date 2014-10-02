@@ -18,19 +18,27 @@
 """
 group views.
 """
+
+from math import ceil
+from reportlab.lib import units, pagesizes
+
 import zc.table.table
 import zc.table.column
 from zope.app.dependable.interfaces import IDependable
 from zope.cachedescriptors.property import Lazy
 from zope.browserpage.viewpagetemplatefile import ViewPageTemplateFile
+from zope.interface import Attribute
+from zope.interface import Interface
 from zope.intid.interfaces import IIntIds
 from zope.traversing.browser.interfaces import IAbsoluteURL
 from zope.interface import implements, directlyProvides
 from zope.publisher.interfaces.browser import IBrowserRequest
 from zope.publisher.browser import BrowserView
 from zope.component import adapts
+from zope.component import getAdapter
 from zope.component import getUtility
 from zope.component import getMultiAdapter
+from zope.component import getAdapters
 from zope.security.checker import canAccess
 from zope.i18n.interfaces.locales import ICollator
 from zope.viewlet.viewlet import ViewletBase
@@ -44,6 +52,9 @@ from z3c.form import field, button, form
 from z3c.form.interfaces import HIDDEN_MODE
 from zc.table.interfaces import ISortableColumn
 from zope.security.interfaces import Unauthorized
+from zope.schema import Choice, Int
+from zope.schema.interfaces import IContextSourceBinder
+from zope.schema.vocabulary import SimpleVocabulary
 
 from schooltool.app.browser.app import ActiveSchoolYearContentMixin
 from schooltool.app.interfaces import ISchoolToolApplication
@@ -62,6 +73,10 @@ from schooltool.person.browser.person import PersonTableFilter
 from schooltool.basicperson.browser.person import StatusPersonListTable
 from schooltool.basicperson.browser.person import EditPersonTemporalRelationships
 from schooltool.basicperson.browser.person import BasicPersonTable
+from schooltool.basicperson.demographics import LEAVE_SCHOOL_FIELDS
+from schooltool.basicperson.interfaces import IDemographics
+from schooltool.basicperson.interfaces import IDemographicsFields
+from schooltool.basicperson.interfaces import IBasicPerson
 from schooltool.course.interfaces import ISection
 from schooltool.schoolyear.interfaces import ISchoolYear
 from schooltool.schoolyear.interfaces import ISchoolYearContainer
@@ -74,6 +89,9 @@ from schooltool.common.inlinept import InheritTemplate
 from schooltool.common.inlinept import InlineViewPageTemplate
 from schooltool.skin import flourish
 from schooltool import table
+from schooltool.app.utils import vocabulary
+from schooltool.term.interfaces import IDateManager
+from schooltool.relationship.temporal import ACTIVE
 
 from schooltool.common import SchoolToolMessage as _
 from schooltool.basicperson.browser.person import FlourishPersonIDCardsViewBase
@@ -940,7 +958,12 @@ class PersonProfileGroupsPart(table.pdf.RMLTablePart):
     title = _("Group memberships")
 
 
-class SignInOutPDFView(flourish.report.PlainPDFPage):
+class GroupPDFViewBase(flourish.report.PlainPDFPage):
+
+    pass
+
+
+class SignInOutPDFView(GroupPDFViewBase):
 
     name = _("Sign In & Out")
 
@@ -1028,9 +1051,287 @@ class SignInOutTable(table.ajax.Table):
 
 class SignInOutTablePart(table.pdf.RMLTablePart):
 
-    template = flourish.templates.XMLFile('rml/sign_in_out.pt')
-
     table_name = 'sign_in_out_table'
+    table_style = 'sign-in-out'
+    template = flourish.templates.XMLFile('rml/sign_in_out.pt')
 
     def getColumnWidths(self, rml_columns):
         return '5% 25% 10% 25% 10% 25%'
+
+
+class OptionalRowVocabulary(SimpleVocabulary):
+
+    implements(IContextSourceBinder)
+
+    def __init__(self, context):
+        self.context = context
+        terms = self.createTerms(self.context.get('options'))
+        SimpleVocabulary.__init__(self, terms)
+
+    def createTerms(self, options):
+        result = []
+        for option in options:
+            result.append(self.createTerm(
+                option['value'],
+                option['token'],
+                option['title'],
+            ))
+        return result
+
+
+def OptionalRowVocabularyFactory():
+    return OptionalRowVocabulary
+
+
+class IRequestStudentNameLabels(Interface):
+
+    optional = Choice(
+        title=_('Optional row'),
+        source='schooltool.group.student_name_labels_optional_row',
+        required=False)
+
+
+class IColumnProvider(Interface):
+
+    order = Int(title=u'Order', required=True)
+
+    columns = Attribute('Iterable with zc.table columns')
+
+
+class ColumnProvider(object):
+
+    implements(IColumnProvider)
+    adapts(flourish.page.PageBase)
+
+    def __init__(self, view):
+        self.context = view
+
+    def columns(self):
+        raise NotImplemented()
+
+
+class DetailsColumnProvider(ColumnProvider):
+
+    order = 0
+
+    @Lazy
+    def columns(self):
+        result = []
+        fields = ['preferred_name', 'birth_date']
+        for name in fields:
+            result.append(zc.table.column.GetterColumn(
+                name=name,
+                title=IBasicPerson[name].title,
+                getter=self.get_person_detail(name)
+                ))
+        return result
+
+    def get_person_detail(self, field):
+        def getter(person, formatter):
+            return getattr(person, field, None) or ''
+        return getter
+
+
+class DemographicsColumnProvider(ColumnProvider):
+
+    order = 1
+
+    @Lazy
+    def columns(self):
+        result = []
+        limit_keys = ['students']
+        dfs = IDemographicsFields(ISchoolToolApplication(None))
+        for df in dfs.filter_keys(limit_keys):
+            name = df.name
+            if name not in LEAVE_SCHOOL_FIELDS:
+                result.append(zc.table.column.GetterColumn(
+                    name=name,
+                    title=df.title,
+                    getter=self.get_person_demographics(name)
+                    ))
+        return result
+
+    def get_person_demographics(self, field):
+        def getter(person, formatter):
+            return IDemographics(person).get(field) or ''
+        return getter
+
+
+class LevelColumnProvider(ColumnProvider):
+
+    order = 2
+
+    @Lazy
+    def columns(self):
+        return [
+            zc.table.column.GetterColumn(
+                name='level',
+                title=_('Grade Level'),
+                getter=self.get_person_level)
+        ]
+
+    def get_person_level(self, person, formatter):
+        result = []
+        today = getUtility(IDateManager).today
+        for level in person.levels.on(today).any(ACTIVE):
+            result.append(level)
+        return ', '.join([level.title for level in result])
+
+
+class GroupTitleColumnProvider(ColumnProvider):
+
+    order = 3
+
+    @Lazy
+    def columns(self):
+        return [
+            zc.table.column.GetterColumn(
+                name='group',
+                title=_('Group title'),
+                getter=self.get_group_title)
+        ]
+
+    def get_group_title(self, person, formatter):
+        view = self.context
+        group = view.context
+        return group.title
+
+
+class RequestStudentNameLabelsReportView(RequestRemoteReportDialog):
+
+    report_builder = 'student_name_labels.pdf'
+
+    fields = field.Fields(IRequestStudentNameLabels)
+
+    def resetForm(self):
+        RequestRemoteReportDialog.resetForm(self)
+        self.form_params['options'] = self.options()
+
+    def options(self):
+        result = []
+        providers = sorted(getAdapters((self,), IColumnProvider),
+                           key=lambda (name, provider): provider.order)
+        for name, provider in providers:
+            for column in provider.columns:
+                token = '%s.%s' % (name, column.name)
+                result.append({
+                    'token': token,
+                    'title': column.title,
+                    'value': token,
+                    })
+        return result
+
+    def updateTaskParams(self, task):
+        optional = self.form_params.get('optional')
+        if optional is not None:
+            task.request_params['optional'] = optional
+
+
+class StudentNameLabelsPDFView(GroupPDFViewBase):
+
+    name = _("Student Name Labels")
+    page_size = pagesizes.LETTER
+    margin = flourish.report.Box(0.5*units.inch, (3.0/16.0)*units.inch)
+
+    @property
+    def message_title(self):
+        return _("group ${title} student name labels",
+                 mapping={'title': self.context.title})
+
+    @property
+    def scope(self):
+        schoolyear = ISchoolYear(self.context.__parent__)
+        return schoolyear.title
+
+    @property
+    def title(self):
+        return self.context.title
+
+    @property
+    def base_filename(self):
+        return 'group_student_label_names_%s' % self.context.__name__
+
+
+class StudentNameLabelsTablePart(table.pdf.RMLTablePart):
+
+    table_name = 'student_name_labels_table'
+    table_style = 'student-name-labels'
+    template = flourish.templates.XMLFile('rml/student_name_labels.pt')
+
+    def getColumnWidths(self, rml_columns):
+        result = ['%.1f%%' % (100.0/3)] * 3
+        return ' '.join(result)
+
+    def getRowHeights(self, table):
+        result = ['0.99in'] * self.row_count(table)
+        return ' '.join(result)
+
+    def row_count(self, table):
+        item_count = len(table['rows'])
+        return int(ceil(item_count / 3.0))
+
+    def getRows(self, table):
+        rows = table['rows']
+        return [rows[x:x+3] for x in range(0, len(rows), 3)]
+
+
+class StudentNameLabelsTable(table.ajax.Table):
+
+    batch_size = 0
+
+    def items(self):
+        return self.context.members
+        result = []
+        for i in range(4):
+            result.extend(list(self.context.members))
+        return result
+
+    def sortOn(self):
+        return getUtility(IPersonFactory).sortOn()
+
+    def columns(self):
+        first_name = table.column.LocaleAwareGetterColumn(
+            name='first_name',
+            title=_(u'First Name'),
+            getter=lambda i, f: i.first_name,
+            subsort=True)
+        last_name = table.column.LocaleAwareGetterColumn(
+            name='last_name',
+            title=_(u'Last Name'),
+            getter=lambda i, f: i.last_name,
+            subsort=True)
+        result = [first_name, last_name]
+        optional_column_token = self.request.get('optional')
+        if optional_column_token is not None:
+            provider_name, column_name = optional_column_token.split('.')
+            provider = getAdapter(self.view, IColumnProvider,
+                                  name=provider_name)
+            optional_column = None
+            for column in provider.columns:
+                if column.name == column_name:
+                    optional_column = column
+                    break
+            if optional_column is not None:
+                result.append(optional_column)
+        return result
+
+
+class StudentNameLabelsPageTemplate(flourish.report.PlainPageTemplate):
+
+    @Lazy
+    def frame(self):
+        doc_w, doc_h = self.manager.page_size
+        margin = flourish.report.Box(0, 0)
+        width = (doc_w - self.manager.margin.left - self.manager.margin.right
+                 - margin.left - margin.right)
+        height = (doc_h - self.manager.margin.top - self.manager.margin.bottom
+                  - margin.top - margin.bottom)
+        x = self.manager.margin.left + margin.left
+        y = self.manager.margin.bottom + margin.bottom
+        return {
+            'height': height,
+            'margin': margin,
+            'width': width,
+            'x': x,
+            'y': y,
+            }

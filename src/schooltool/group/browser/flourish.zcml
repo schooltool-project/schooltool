@@ -486,12 +486,12 @@
       />
 
   <flourish:viewlet
-      name="sign_in_out_styles"
+      name="group_pdf_styles"
       after="*"
       manager="schooltool.skin.flourish.report.PDFStylesheetSection"
-      view=".group.SignInOutPDFView"
+      view=".group.GroupPDFViewBase"
       class="schooltool.skin.flourish.report.PDFPart"
-      template="rml/sign_in_out_styles.pt"
+      template="rml/group_pdf_styles.pt"
       permission="zope.Public"
       />
 
@@ -500,6 +500,83 @@
       manager="schooltool.skin.flourish.report.PDFStory"
       view=".group.SignInOutPDFView"
       class=".group.SignInOutTablePart"
+      permission="zope.Public"
+      />
+
+  <report:reportLink
+      name="student_name_labels"
+      for="schooltool.group.interfaces.IGroup"
+      layer="schooltool.skin.flourish.IFlourishLayer"
+      permission="schooltool.view"
+      group="Group"
+      description="XXX description XXX"
+      title="Student Name Labels"
+      file_type="pdf"
+      link="request_student_name_labels.html"
+      />
+
+  <flourish:page
+      name="request_student_name_labels.html"
+      for="schooltool.group.interfaces.IGroup"
+      class=".group.RequestStudentNameLabelsReportView"
+      permission="schooltool.edit"
+      />
+
+  <zope:utility
+     factory=".group.OptionalRowVocabularyFactory"
+     provides="zope.schema.interfaces.IVocabularyFactory"
+     name="schooltool.group.student_name_labels_optional_row"
+     />
+
+  <flourish:pdf
+      name="student_name_labels.pdf"
+      for="schooltool.group.interfaces.IGroup"
+      class=".group.StudentNameLabelsPDFView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:viewlet
+      name="table"
+      manager="schooltool.skin.flourish.report.PDFStory"
+      view=".group.StudentNameLabelsPDFView"
+      class=".group.StudentNameLabelsTablePart"
+      permission="zope.Public"
+      />
+
+  <flourish:content
+      name="student_name_labels_table"
+      for="schooltool.group.interfaces.IGroup"
+      class=".group.StudentNameLabelsTable"
+      permission="schooltool.view"
+      />
+
+  <zope:adapter
+      factory=".group.DetailsColumnProvider"
+      name="details"
+      />
+
+  <zope:adapter
+      factory=".group.DemographicsColumnProvider"
+      name="demographics"
+      />
+
+  <zope:adapter
+      factory=".group.LevelColumnProvider"
+      name="level"
+      />
+
+  <zope:adapter
+      factory=".group.GroupTitleColumnProvider"
+      name="group_title"
+      />
+
+  <flourish:viewlet
+      name="default"
+      manager="schooltool.skin.flourish.report.PDFTemplateSection"
+      view=".group.StudentNameLabelsPDFView"
+      class=".group.StudentNameLabelsPageTemplate"
+      render="template"
+      template="rml/student_name_labels_page_template.pt"
       permission="zope.Public"
       />
 
