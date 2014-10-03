@@ -7,11 +7,12 @@
   <pto>
     <tal:block repeat="table options/content">
       <blockTable
+          tal:define="rows python: view.getRows(table);"
           tal:attributes="colWidths options/col_widths;
-                          rowHeights python:view.getRowHeights(table);
+                          rowHeights python:view.getRowHeights(rows);
                           style view/table_style"
                   alignment="left">
-        <tr tal:repeat="row python:view.getRows(table)">
+        <tr tal:repeat="row rows">
           <td tal:repeat="cell row">
             <para tal:repeat="attr cell" tal:content="attr" style="label-attr" />
           </td>

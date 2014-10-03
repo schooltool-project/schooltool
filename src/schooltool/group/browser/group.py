@@ -19,7 +19,6 @@
 group views.
 """
 
-from math import ceil
 from reportlab.lib import units, pagesizes
 
 import zc.table.table
@@ -77,6 +76,9 @@ from schooltool.basicperson.demographics import LEAVE_SCHOOL_FIELDS
 from schooltool.basicperson.interfaces import IDemographics
 from schooltool.basicperson.interfaces import IDemographicsFields
 from schooltool.basicperson.interfaces import IBasicPerson
+from schooltool.contact.interfaces import IAddress
+from schooltool.contact.interfaces import IContact
+from schooltool.contact.interfaces import IContactable
 from schooltool.course.interfaces import ISection
 from schooltool.schoolyear.interfaces import ISchoolYear
 from schooltool.schoolyear.interfaces import ISchoolYearContainer
@@ -1229,7 +1231,6 @@ class RequestStudentNameLabelsReportView(RequestRemoteReportDialog):
 
 class StudentNameLabelsPDFView(GroupPDFViewBase):
 
-    name = _("Student Name Labels")
     page_size = pagesizes.LETTER
     margin = flourish.report.Box(0.5*units.inch, (3.0/16.0)*units.inch)
 
@@ -1249,7 +1250,7 @@ class StudentNameLabelsPDFView(GroupPDFViewBase):
 
     @property
     def base_filename(self):
-        return 'group_student_label_names_%s' % self.context.__name__
+        return 'group_student_name_labels_%s' % self.context.__name__
 
 
 class StudentNameLabelsTablePart(table.pdf.RMLTablePart):
@@ -1257,22 +1258,21 @@ class StudentNameLabelsTablePart(table.pdf.RMLTablePart):
     table_name = 'student_name_labels_table'
     table_style = 'student-name-labels'
     template = flourish.templates.XMLFile('rml/student_name_labels.pt')
+    column_count = 3
+    row_height = 0.99 * units.inch
 
     def getColumnWidths(self, rml_columns):
-        result = ['%.1f%%' % (100.0/3)] * 3
+        result = ['%.1f%%' % (100.0/self.column_count)] * self.column_count
         return ' '.join(result)
 
-    def getRowHeights(self, table):
-        result = ['0.99in'] * self.row_count(table)
+    def getRowHeights(self, rows):
+        result = ['%.2f' % self.row_height] * len(rows)
         return ' '.join(result)
-
-    def row_count(self, table):
-        item_count = len(table['rows'])
-        return int(ceil(item_count / 3.0))
 
     def getRows(self, table):
         rows = table['rows']
-        return [rows[x:x+3] for x in range(0, len(rows), 3)]
+        return [rows[i:i+self.column_count]
+                for i in range(0, len(rows), self.column_count)]
 
 
 class StudentNameLabelsTable(table.ajax.Table):
@@ -1281,10 +1281,6 @@ class StudentNameLabelsTable(table.ajax.Table):
 
     def items(self):
         return self.context.members
-        result = []
-        for i in range(4):
-            result.extend(list(self.context.members))
-        return result
 
     def sortOn(self):
         return getUtility(IPersonFactory).sortOn()
@@ -1335,3 +1331,89 @@ class StudentNameLabelsPageTemplate(flourish.report.PlainPageTemplate):
             'x': x,
             'y': y,
             }
+
+
+class RequestMailingLabelsReportView(RequestRemoteReportDialog):
+
+    report_builder = 'mailing_labels.pdf'
+
+
+class MailingLabelsPDFView(StudentNameLabelsPDFView):
+
+    @property
+    def message_title(self):
+        return _("group ${title} mailing labels",
+                 mapping={'title': self.context.title})
+
+    @property
+    def scope(self):
+        schoolyear = ISchoolYear(self.context.__parent__)
+        return schoolyear.title
+
+    @property
+    def title(self):
+        return self.context.title
+
+    @property
+    def base_filename(self):
+        return 'group_mailing_labels_%s' % self.context.__name__
+
+
+class MailingLabelsTablePart(StudentNameLabelsTablePart):
+
+    table_name = 'mailing_labels_table'
+    column_count = 2
+    row_height = 1.99 * units.inch
+
+
+def city_getter(contact, formatter):
+    contact = IContact(contact)
+    city = contact.city
+    state = contact.state
+    postal_code = contact.postal_code
+    return ' '.join(filter(None, [city, state, postal_code]))
+
+
+class MailingLabelsTable(table.ajax.Table):
+
+    batch_size = 0
+
+    def has_address(self, contact):
+        for field_name in IAddress:
+            if getattr(contact, field_name):
+                return True
+        return False
+            
+    def items(self):
+        result = []
+        for member in self.context.members:
+            if self.has_address(IContact(member)):
+                result.append(member)
+            for contact in IContactable(member).contacts:
+                if self.has_address(contact):
+                    result.append(contact)
+        return result
+
+    def columns(self):
+        title = table.column.LocaleAwareGetterColumn(
+            name='title',
+            title=_(u'Title'),
+            getter=lambda i, f: i.title,
+            subsort=True)
+        address_1 = zc.table.column.GetterColumn(
+            name='address_1',
+            title=_(u'Address 1'),
+            getter=lambda i, f: IContact(i).address_line_1)
+        address_2 = zc.table.column.GetterColumn(
+            name='address_2',
+            title=_(u'Address 2'),
+            getter=lambda i, f: IContact(i).address_line_2)
+        city = zc.table.column.GetterColumn(
+            name='city',
+            title=_(u'City'),
+            getter=city_getter)
+        country = zc.table.column.GetterColumn(
+            name='country',
+            title=_(u'Country'),
+            getter=lambda i, f: IContact(i).country)
+        return [title, address_1, address_2, city, country]
