@@ -14,7 +14,10 @@
                   alignment="left">
         <tr tal:repeat="row rows">
           <td tal:repeat="cell row">
-            <para tal:repeat="attr cell" tal:content="attr" style="label-attr" />
+            <tal:block repeat="attr cell">
+              <para tal:condition="attr" tal:content="attr"
+                    tal:attributes="style view/paragraph_style" />
+            </tal:block>
           </td>
         </tr>
       </blockTable>

@@ -1257,6 +1257,7 @@ class StudentNameLabelsTablePart(table.pdf.RMLTablePart):
 
     table_name = 'student_name_labels_table'
     table_style = 'student-name-labels'
+    paragraph_style = 'label-attr-center'
     template = flourish.templates.XMLFile('rml/student_name_labels.pt')
     column_count = 3
     row_height = 0.99 * units.inch
@@ -1362,6 +1363,8 @@ class MailingLabelsPDFView(StudentNameLabelsPDFView):
 class MailingLabelsTablePart(StudentNameLabelsTablePart):
 
     table_name = 'mailing_labels_table'
+    table_style = 'mailing-labels'
+    paragraph_style = 'label-attr-left'
     column_count = 2
     row_height = 1.99 * units.inch
 
@@ -1369,6 +1372,8 @@ class MailingLabelsTablePart(StudentNameLabelsTablePart):
 def city_getter(contact, formatter):
     contact = IContact(contact)
     city = contact.city
+    if city is not None:
+        city += ','
     state = contact.state
     postal_code = contact.postal_code
     return ' '.join(filter(None, [city, state, postal_code]))
