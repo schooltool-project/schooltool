@@ -68,6 +68,7 @@ from schooltool.course.interfaces import ICourse, ICourseContainer
 from schooltool.course.interfaces import ISection, ISectionContainer
 from schooltool.course.section import Section
 from schooltool.course.section import copySection
+from schooltool.group.browser.group import MailingLabelsPDFView
 from schooltool.group.browser.group import SignInOutPDFView
 from schooltool.group.browser.group import number_getter
 from schooltool.person.interfaces import IPerson
@@ -2086,3 +2087,39 @@ class StudentsListTablePart(table.pdf.RMLTablePart):
 
     def getColumnWidths(self, rml_columns):
         return '5% 3% 3% 54% 35%'
+
+
+class SectionMailingLabelsPDFView(MailingLabelsPDFView):
+
+    @property
+    def message_title(self):
+        return _("section ${title} mailing labels",
+                 mapping={'title': self.context.title})
+
+    @property
+    def scope(self):
+        term = ITerm(self.context)
+        schoolyear = term.__parent__
+        return '%s | %s' % (term.title, schoolyear.title)
+
+    @property
+    def subtitles_left(self):
+        section = removeSecurityProxy(self.context)
+        instructors = '; '.join([person.title
+                                 for person in section.instructors])
+        instructors_message = _('Instructors: ${instructors}',
+                                mapping={'instructors': instructors})
+        subtitles = [
+            '%s (%s)' % (section.title, section.__name__),
+            instructors_message,
+            ]
+        return subtitles
+
+    @property
+    def title(self):
+        return ', '.join([course.title for course in self.context.courses])
+
+    @property
+    def base_filename(self):
+        courses = [c.__name__ for c in self.context.courses]
+        return 'section_mailing_labels_%s' % '_'.join(courses)

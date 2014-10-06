@@ -815,4 +815,45 @@
       permission="zope.Public"
       />
 
+  <report:reportLink
+      name="mailing_labels"
+      for="schooltool.course.interfaces.ISection"
+      layer="schooltool.skin.flourish.IFlourishLayer"
+      permission="schooltool.view"
+      group="Section"
+      description="XXX description XXX"
+      title="Mailing Labels"
+      file_type="pdf"
+      link="request_mailing_labels.html"
+      />
+
+  <flourish:page
+      name="request_mailing_labels.html"
+      for="schooltool.course.interfaces.ISection"
+      class="schooltool.group.browser.group.RequestMailingLabelsReportView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:pdf
+      name="mailing_labels.pdf"
+      for="schooltool.course.interfaces.ISection"
+      class=".section.SectionMailingLabelsPDFView"
+      permission="schooltool.edit"
+      />
+
+  <flourish:viewlet
+      name="table"
+      manager="schooltool.skin.flourish.report.PDFStory"
+      view=".section.SectionMailingLabelsPDFView"
+      class="schooltool.group.browser.group.MailingLabelsTablePart"
+      permission="zope.Public"
+      />
+
+  <flourish:content
+      name="mailing_labels_table"
+      for="schooltool.course.interfaces.ISection"
+      class="schooltool.group.browser.group.MailingLabelsTable"
+      permission="schooltool.view"
+      />
+
 </configure>
