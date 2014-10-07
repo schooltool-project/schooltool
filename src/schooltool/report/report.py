@@ -381,7 +381,7 @@ class AbstractReportTask(RemoteTask):
 
     def __init__(self, report_builder, context, remote_request=None):
         RemoteTask.__init__(self)
-        if isinstance(report_builder, str):
+        if isinstance(report_builder, basestring):
             self.view_name = report_builder
         else:
             self.factory = report_builder
