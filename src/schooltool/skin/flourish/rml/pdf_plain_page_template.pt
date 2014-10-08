@@ -62,7 +62,7 @@
           file="[schooltool.skin.flourish]/resources/logo_bw.png"
           tal:attributes="x bottom_bar/slots/left/x;
                           y bottom_bar/y;
-                          height bottom_bar/height;"
+                          height bottom_bar/fontSize;"
           preserveAspectRatio="True" />
       <drawRightString
           tal:attributes="x bottom_bar/slots/right/x;

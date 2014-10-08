@@ -299,7 +299,7 @@ class PlainPageTemplate(PageTemplate):
         width = self.frame['width']
         x1 = self.frame['x']
         x2 = x1 + width
-        y = self.frame['y'] - (self.frame['margin'].top / 2.0)
+        y = self.frame['y'] - self.frame['margin'].bottom
         return {
             'coords': '%d %d %d %d' % (x1, y, x2, y),
             }
@@ -462,7 +462,7 @@ class PlainPageTemplate(PageTemplate):
     @Lazy
     def bottom_bar(self):
         fontSize = 8.5
-        padding = Box(1.5, 10.5)
+        padding = Box(3.5, 10.5, 1.5, 10.5)
         height = fontSize + padding.top + padding.bottom
         doc_w, doc_h = self.manager.page_size
         width = doc_w - self.manager.margin.left - self.manager.margin.right
