@@ -46,7 +46,7 @@
 
   <blockTableStyle id="multi-table.content-only">
     <blockValign value="TOP" start="0,0" stop="-1,-1"/>
-    <blockFont start="0,0" stop="-1,-1"
+    <blockFont start="0,0" stop="-1,-1" size="8"
                name="Ubuntu_Regular" />
     <blockBackground start="0,0" stop="-1,-1"
                      colorsByRow="table.row-alt.background,table.row.background" />
