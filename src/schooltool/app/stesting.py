@@ -118,6 +118,8 @@ def get_grades(browser, row, show_validation):
 
 
 def table_rows(browser, show_validation, hide_homeroom):
+    # XXX: ignore columns average row for now
+    has_average_row = False
     rows = []
     sel = '.students tbody tr'
     student_rows = browser.driver.execute_script(
@@ -129,6 +131,8 @@ def table_rows(browser, show_validation, hide_homeroom):
         for link in links:
             student.append(link.text.strip())
         rows.append(student)
+    if not len(rows[-1]):
+        has_average_row = True
     sel = '.totals tbody tr'
     total_rows = browser.driver.execute_script(
         'return $(arguments[0])', sel)
@@ -155,6 +159,8 @@ def table_rows(browser, show_validation, hide_homeroom):
                 new_row = ['', ''] + grades + ([''] * totals_count)
                 rows.insert(student_index, new_row)
             student_index += 1
+    if has_average_row:
+        return rows[:-1]
     return rows
 
 
