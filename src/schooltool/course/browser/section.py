@@ -1848,78 +1848,6 @@ class SectionsYearNavBreadcrumbs(SchoolyearNavBreadcrumbs):
     title = _('Sections')
 
 
-class SectionRosterPDFView(flourish.report.PlainPDFPage):
-
-    name = _("Section Roster")
-
-    content_template = flourish.templates.XMLFile('rml/section_roster.pt')
-
-    @property
-    def message_title(self):
-        return _("section ${title} roster",
-                 mapping={'title': self.context.title})
-
-    def formatDate(self, date, format='mediumDate'):
-        if date is None:
-            return ''
-        formatter = getMultiAdapter((date, self.request), name=format)
-        return formatter()
-
-    @property
-    def scope(self):
-        term = ITerm(self.context)
-        first = self.formatDate(term.first)
-        last = self.formatDate(term.last)
-        return '%s | %s - %s' % (term.title, first, last)
-
-    @property
-    def subtitles_left(self):
-        section = removeSecurityProxy(self.context)
-        instructors = '; '.join([person.title
-                                 for person in section.instructors])
-        instructors_message = _('Instructors: ${instructors}',
-                                mapping={'instructors': instructors})
-        subtitles = [
-            '%s (%s)' % (section.title, section.__name__),
-            instructors_message,
-            ]
-        return subtitles
-
-    @property
-    def title(self):
-        return ', '.join([course.title for course in self.context.courses])
-
-    @property
-    def base_filename(self):
-        courses = [c.__name__ for c in self.context.courses]
-        return 'section_roster_%s' % '_'.join(courses)
-
-    @property
-    def term(self):
-        return ITerm(self.context)
-
-    def rows(self):
-        result = []
-        collator = ICollator(self.request.locale)
-        factory = getUtility(IPersonFactory)
-        sorting_key = lambda x: factory.getSortingKey(x, collator)
-        for student in sorted(self.context.members, key=sorting_key):
-            demographics = IDemographics(student)
-            result.append({
-                    'full_name': self.full_name(student),
-                    'ID': demographics.get('ID', '')
-                    })
-        return result
-
-    def full_name(self, person):
-        return person.title
-
-
-class FlourishRequestSectionRosterView(RequestRemoteReportDialog):
-
-    report_builder = SectionRosterPDFView
-
-
 class SectionMembershipPersonListTable(StatusPersonListTable):
 
     app_states_name = 'section-membership'
@@ -1972,18 +1900,18 @@ class SectionSignInOutPDFView(SignInOutPDFView):
         return 'section_sign_in_out_%s' % '_'.join(courses)
 
 
-class RequestStudentsListReportView(RequestRemoteReportDialog):
+class FlourishRequestSectionRosterView(RequestRemoteReportDialog):
 
-    report_builder = 'students_list.pdf'
+    report_builder = 'section_roster.pdf'
 
 
-class StudentsListPDFView(flourish.report.PlainPDFPage):
+class SectionRosterPDFView(flourish.report.PlainPDFPage):
 
-    name = _('Students List')
+    name = _('Section Roster')
 
     @property
     def message_title(self):
-        return _("section ${title} students list",
+        return _("section ${title} roster",
                  mapping={'title': self.context.title})
 
     def formatDate(self, date, format='mediumDate'):
@@ -2018,7 +1946,7 @@ class StudentsListPDFView(flourish.report.PlainPDFPage):
     @property
     def base_filename(self):
         courses = [c.__name__ for c in self.context.courses]
-        return 'section_students_list_%s' % '_'.join(courses)
+        return 'section_roster_%s' % '_'.join(courses)
 
 
 def level_getter(today):
@@ -2032,7 +1960,7 @@ def level_getter(today):
     return getter
 
 
-class StudentsListTable(table.ajax.Table):
+class SectionRosterTable(table.ajax.Table):
 
     batch_size = 0
     visible_column_names = ['number', 'left_bracket', 'right_bracket',
@@ -2081,9 +2009,9 @@ class StudentsListTable(table.ajax.Table):
                 title, level]
 
 
-class StudentsListTablePart(table.pdf.RMLTablePart):
+class SectionRosterTablePart(table.pdf.RMLTablePart):
 
-    table_name = 'students_list_table'
+    table_name = 'section_roster_table'
 
     def getColumnWidths(self, rml_columns):
         return '5% 3% 3% 54% 35%'
