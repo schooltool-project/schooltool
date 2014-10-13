@@ -1028,7 +1028,7 @@ class SignInOutTable(table.ajax.Table):
             getter=number_getter)
         title = table.column.LocaleAwareGetterColumn(
             name='title',
-            title=_(u'Title'),
+            title=_(u'Name'),
             getter=lambda i, f: i.title,
             subsort=True)
         time_in = zc.table.column.GetterColumn(
@@ -1402,7 +1402,7 @@ class MailingLabelsTable(table.ajax.Table):
     def columns(self):
         title = table.column.LocaleAwareGetterColumn(
             name='title',
-            title=_(u'Title'),
+            title=_(u'Name'),
             getter=lambda i, f: i.title,
             subsort=True)
         address_1 = zc.table.column.GetterColumn(

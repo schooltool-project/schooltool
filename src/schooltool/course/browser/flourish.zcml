@@ -795,7 +795,7 @@
       layer="schooltool.skin.flourish.IFlourishLayer"
       permission="schooltool.view"
       group="Section"
-      description="XXX description XXX"
+      description="Formatted for Avery 5163 labels."
       title="Mailing Labels"
       file_type="pdf"
       link="request_mailing_labels.html"

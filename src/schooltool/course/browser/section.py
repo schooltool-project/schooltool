@@ -1858,18 +1858,25 @@ class SectionInstructionPersonListTable(StatusPersonListTable):
     app_states_name = 'section-instruction'
 
 
-class SectionSignInOutPDFView(SignInOutPDFView):
+class SectionPDFViewBase(object):
 
     @property
-    def message_title(self):
-        return _("section ${title} sign in & out",
-                 mapping={'title': self.context.title})
-
-    def formatDate(self, date, format='mediumDate'):
-        if date is None:
-            return ''
-        formatter = getMultiAdapter((date, self.request), name=format)
-        return formatter()
+    def subtitles_left(self):
+        section = removeSecurityProxy(self.context)
+        instructors = '; '.join([person.title
+                                 for person in section.instructors])
+        locations =  '; '.join([r.title for r in self.context.resources
+                                if ILocation(r, None) is not None])
+        instructors_message = _('Instructors: ${instructors}',
+                                mapping={'instructors': instructors})
+        locations_message = _('Locations: ${locations}',
+                              mapping={'locations': locations})
+        subtitles = [
+            '%s (%s)' % (section.title, section.__name__),
+            instructors_message,
+            locations_message,
+            ]
+        return subtitles
 
     @property
     def scope(self):
@@ -1878,21 +1885,16 @@ class SectionSignInOutPDFView(SignInOutPDFView):
         return '%s | %s' % (term.title, schoolyear.title)
 
     @property
-    def subtitles_left(self):
-        section = removeSecurityProxy(self.context)
-        instructors = '; '.join([person.title
-                                 for person in section.instructors])
-        instructors_message = _('Instructors: ${instructors}',
-                                mapping={'instructors': instructors})
-        subtitles = [
-            '%s (%s)' % (section.title, section.__name__),
-            instructors_message,
-            ]
-        return subtitles
-
-    @property
     def title(self):
         return ', '.join([course.title for course in self.context.courses])
+
+
+class SectionSignInOutPDFView(SectionPDFViewBase, SignInOutPDFView):
+
+    @property
+    def message_title(self):
+        return _("section ${title} sign in & out",
+                 mapping={'title': self.context.title})
 
     @property
     def base_filename(self):
@@ -1905,7 +1907,7 @@ class FlourishRequestSectionRosterView(RequestRemoteReportDialog):
     report_builder = 'section_roster.pdf'
 
 
-class SectionRosterPDFView(flourish.report.PlainPDFPage):
+class SectionRosterPDFView(SectionPDFViewBase, flourish.report.PlainPDFPage):
 
     name = _('Section Roster')
 
@@ -1913,35 +1915,6 @@ class SectionRosterPDFView(flourish.report.PlainPDFPage):
     def message_title(self):
         return _("section ${title} roster",
                  mapping={'title': self.context.title})
-
-    def formatDate(self, date, format='mediumDate'):
-        if date is None:
-            return ''
-        formatter = getMultiAdapter((date, self.request), name=format)
-        return formatter()
-
-    @property
-    def scope(self):
-        term = ITerm(self.context)
-        schoolyear = term.__parent__
-        return '%s | %s' % (term.title, schoolyear.title)
-
-    @property
-    def subtitles_left(self):
-        section = removeSecurityProxy(self.context)
-        instructors = '; '.join([person.title
-                                 for person in section.instructors])
-        instructors_message = _('Instructors: ${instructors}',
-                                mapping={'instructors': instructors})
-        subtitles = [
-            '%s (%s)' % (section.title, section.__name__),
-            instructors_message,
-            ]
-        return subtitles
-
-    @property
-    def title(self):
-        return ', '.join([course.title for course in self.context.courses])
 
     @property
     def base_filename(self):
@@ -1998,7 +1971,7 @@ class SectionRosterTable(table.ajax.Table):
             getter=lambda i, f: u']')
         title = table.column.LocaleAwareGetterColumn(
             name='title',
-            title=_(u'Title'),
+            title=_(u'Name'),
             getter=lambda i, f: i.title,
             subsort=True)
         level = zc.table.column.GetterColumn(
@@ -2017,35 +1990,12 @@ class SectionRosterTablePart(table.pdf.RMLTablePart):
         return '5% 3% 3% 54% 35%'
 
 
-class SectionMailingLabelsPDFView(MailingLabelsPDFView):
+class SectionMailingLabelsPDFView(SectionPDFViewBase, MailingLabelsPDFView):
 
     @property
     def message_title(self):
         return _("section ${title} mailing labels",
                  mapping={'title': self.context.title})
-
-    @property
-    def scope(self):
-        term = ITerm(self.context)
-        schoolyear = term.__parent__
-        return '%s | %s' % (term.title, schoolyear.title)
-
-    @property
-    def subtitles_left(self):
-        section = removeSecurityProxy(self.context)
-        instructors = '; '.join([person.title
-                                 for person in section.instructors])
-        instructors_message = _('Instructors: ${instructors}',
-                                mapping={'instructors': instructors})
-        subtitles = [
-            '%s (%s)' % (section.title, section.__name__),
-            instructors_message,
-            ]
-        return subtitles
-
-    @property
-    def title(self):
-        return ', '.join([course.title for course in self.context.courses])
 
     @property
     def base_filename(self):
