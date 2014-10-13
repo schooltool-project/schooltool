@@ -458,7 +458,7 @@
       layer="schooltool.skin.flourish.IFlourishLayer"
       permission="schooltool.view"
       group="Group"
-      description="XXX description XXX"
+      description="Table of group members with spaces to sign in and out."
       title="Sign In &amp; Out"
       file_type="pdf"
       link="request_sign_in_out.html"
