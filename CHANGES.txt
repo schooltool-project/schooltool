@@ -2,10 +2,13 @@
 CHANGES
 =======
 
-2.8.2 (unreleased)
+2.8.2 (2014-10-14)
 ------------------
 
-- Nothing changed yet.
+- Added Sign In & Out report for groups/sections
+- Added Mailing Labels report for groups/sections
+- Added Name Labels report for groups
+- Updated Roster report for sections
 
 
 2.8.1 (2014-08-25)
