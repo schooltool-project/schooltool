@@ -26,6 +26,7 @@ from zope.app.testing import setup
 from zope.interface import implements, Interface
 from zope.interface.verify import verifyObject
 from zope.location.pickling import LocationCopyHook
+from zope.location.interfaces import ILocation
 from zope.component import provideAdapter
 from zope.component.hooks import getSite, setSite
 from zope.site import SiteManagerContainer
@@ -270,7 +271,7 @@ def setUpIntegration(test):
     zcml.include('schooltool.level', file='level.zcml')
     zcml.include('schooltool.schoolyear', file='schoolyear.zcml')
     zcml.include('schooltool.relationship', file='relationship.zcml')
-    provideAdapter(LocationCopyHook)
+    provideAdapter(LocationCopyHook, (ILocation,))
 
     root = rootFolder()
     root['app'] = provideApplicationStub()

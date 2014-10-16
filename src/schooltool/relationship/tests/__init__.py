@@ -85,9 +85,10 @@ def setUpRelationships():
     """
     from zope.annotation.interfaces import IAnnotatable
     from zope.component import provideAdapter
+    from zope.location.interfaces import ILocation
     from schooltool.relationship.interfaces import IRelationshipLinks
     from schooltool.relationship.annotatable import getRelationshipLinks
     provideAdapter(getRelationshipLinks, (IAnnotatable,), IRelationshipLinks)
-    provideAdapter(LocationCopyHook)
+    provideAdapter(LocationCopyHook, (ILocation,))
 
 
