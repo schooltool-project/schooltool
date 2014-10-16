@@ -30,6 +30,7 @@ from zope.container.contained import Contained
 from zope.interface import implements, Interface
 from zope.interface.verify import verifyObject
 from zope.location.pickling import LocationCopyHook
+from zope.location.interfaces import ILocation
 from zope.component import provideAdapter
 from zope.component.hooks import getSite
 
@@ -219,7 +220,7 @@ def setUp(test):
     vocabulary._clear()
     zcml = getIntegrationTestZCML()
     zcml.include('schooltool.level', file='level.zcml')
-    provideAdapter(LocationCopyHook)
+    provideAdapter(LocationCopyHook, (ILocation,))
     app = AppStub()
     app['schooltool.course.course'] = BTreeContainer()
     test.globs.update({
