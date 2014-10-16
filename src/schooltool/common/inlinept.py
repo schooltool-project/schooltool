@@ -142,5 +142,9 @@ def InheritTemplate(template):
 
     """
     if isinstance(template, BoundPageTemplate):
-        return template.im_func
+        try:
+            return template.im_func
+        except AttributeError:
+            # Python 3 style name since zope.browserpage 4.1.0a1
+            return template.__func__
     return template
