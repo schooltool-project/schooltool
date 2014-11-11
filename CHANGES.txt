@@ -2,10 +2,11 @@
 CHANGES
 =======
 
-2.8.3 (unreleased)
+2.8.3 (2014-11-11)
 ------------------
 
-- Nothing changed yet.
+- Specified 24 hour format for slots in timetable wizard (https://bugs.launchpad.net/bugs/892941)
+- Moved custom CSS handling to /etc/schooltool/standard/custom-css
 
 
 2.8.2 (2014-10-14)
