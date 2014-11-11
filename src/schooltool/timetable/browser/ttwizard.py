@@ -457,7 +457,9 @@ class SimpleSlotEntryStep(FormStep):
     __name__ = 'simple_slot_entry_step'
 
     description = _("Enter start and end times for each slot,"
-                    " one slot (HH:MM - HH:MM) per line.")
+                    " one slot (HH:MM - HH:MM) per line. "
+                    "The start and end times MUST BE IN 24 HOUR FORMAT, "
+                    "for example, 13:30 not 01:30 PM.")
 
     class schema(Interface):
         times = Text(default=u"9:30-10:25\n10:30-11:25", required=False)
@@ -500,7 +502,9 @@ class RotatingSlotEntryStep(Step):
     __call__ = ViewPageTemplateFile("templates/ttwizard_slottimes.pt")
 
     description = _("Enter start and end times for each slot on each day,"
-                    " one slot (HH:MM - HH:MM) per line.")
+                    " one slot (HH:MM - HH:MM) per line. The start and "
+                    "end times MUST BE IN 24 HOUR FORMAT, "
+                    "for example, 13:30 not 01:30 PM.")
 
     error = None
     example_intervals = '8:00 - 8:45\n9:05 - 9:50\n'
