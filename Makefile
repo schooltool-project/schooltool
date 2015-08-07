@@ -232,5 +232,4 @@ ubuntu-environment:
 	    python-dev python-virtualenv \
 	    ttf-ubuntu-font-family ttf-liberation \
 	    libicu-dev libxslt1-dev libfreetype6-dev libjpeg-dev \
-	    redis-server
-
+	    redis-server subversion xvfb
