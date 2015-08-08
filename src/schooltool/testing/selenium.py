@@ -1481,16 +1481,6 @@ class SeleniumDocFileCase(doctest.DocFileCase):
             self._layer.patches[-1].mock(
                 dict(filter(lambda (a, m): m is not None, patches.items())))
 
-    def run(self, *args, **kw):
-        if BLACK_MAGIC:
-            test = self._dt_test
-            patches = {
-                'doctest.compile':
-                    make_doctest_compile_patch(test),
-                }
-            self.patch(patches)
-        return doctest.DocFileCase.run(self, *args, **kw)
-
     def debug(self):
         if BLACK_MAGIC:
             test = self._dt_test
